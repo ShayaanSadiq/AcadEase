@@ -6,7 +6,7 @@ import re
 import numpy as np
 
 # Define the cutoff time for being "late" (in 24-hour format)
-cutoff_time = datetime.datetime.strptime("06:45:00 PM", "%H:%M:%S %p")
+cutoff_time = datetime.datetime.strptime("09:30:00 AM", "%H:%M:%S %p")
 cutoff_time1=cutoff_time.strftime("%H:%M:%S %p") 
 
 # Function to validate roll number format (6 digits)
@@ -30,17 +30,11 @@ def log_student_in(roll_number):
                 if len(row) >= 4 and row[0] == roll_number:  # Ensure there are at least 4 columns
                     # Get the last login date and time for this roll number
                     last_login_date = row[2]
-                    last_login_time = datetime.datetime.strptime(row[1], "%H:%M:%S %p")
 
                     # Check if the student is trying to log in on the same day
                     if last_login_date == date_str:
-                        # If the login is after the cutoff time, deny access
-                        if last_login_time > cutoff_time:
-                            print(f"Student {roll_number} tried to log in after cutoff time ({time_str}), login denied.")
-                            return  # Deny login if after cutoff time
-                        else:
-                            print(f"Student {roll_number} has already been marked as present today.")
-                            return  # If already logged in today, do nothing
+                        print(f"Student {roll_number} has already been marked as present today.")
+                        return  # If already logged in today, do nothing
 
                     # If the login is on a different day, allow it
                     print(f"Student {roll_number} logging in for a new day ({date_str}).")
