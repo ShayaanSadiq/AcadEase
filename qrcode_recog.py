@@ -6,8 +6,7 @@ import re
 import numpy as np
 
 # Define the cutoff time for being "late" (in 24-hour format)
-cutoff_time = datetime.datetime.strptime("09:30:00 AM", "%H:%M:%S %p")
-cutoff_time1=cutoff_time.strftime("%H:%M:%S %p") 
+cutoff_time = datetime.datetime.strptime("09:30:00", "%H:%M:%S")  # 21:30:00 in 24-hour format
 
 # Function to validate roll number format (6 digits)
 def is_valid_roll_number(roll_number):
@@ -16,7 +15,7 @@ def is_valid_roll_number(roll_number):
 
 def log_student_in(roll_number):
     current_time = datetime.datetime.now()
-    time_str = current_time.strftime("%I:%M:%S %p")  # 24-hour format
+    current_time_24hr = current_time.strftime("%H:%M:%S")  # 24-hour format time
     date_str = current_time.strftime("%Y-%m-%d")  # YYYY-MM-DD format
 
     # Open the CSV file to read previous logins and avoid duplicates
@@ -47,10 +46,10 @@ def log_student_in(roll_number):
             pass
     
     # Log the student's roll number and timestamp if they are not already marked as present
-    login_time = current_time.strftime("%H:%M:%S %p")
+    login_time = current_time_24hr
     
     # Check if the student is late or on time
-    if time_str > cutoff_time1:
+    if datetime.datetime.strptime(login_time, "%H:%M:%S") > cutoff_time:
         status = 'Late Comer'
     else:
         status = 'On Time'
