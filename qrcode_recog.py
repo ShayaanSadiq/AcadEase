@@ -5,8 +5,9 @@ import csv
 import re
 import numpy as np
 
-# Define the cutoff time for being "late" (in 12-hour format)
-cutoff_time = datetime.datetime.strptime("09:30:00 AM", "%I:%M:%S %p")  # 12-hour format with AM/PM
+# Define the cutoff time for being "late" (in 24-hour format)
+cutoff_time = datetime.datetime.strptime("06:45:00 PM", "%H:%M:%S %p")
+cutoff_time1=cutoff_time.strftime("%H:%M:%S %p") 
 
 # Function to validate roll number format (6 digits)
 def is_valid_roll_number(roll_number):
@@ -15,8 +16,8 @@ def is_valid_roll_number(roll_number):
 
 def log_student_in(roll_number):
     current_time = datetime.datetime.now()
-    time_str = current_time.strftime("%I:%M:%S %p")  # Get the current time in 12-hour format (e.g., 02:06:27 PM)
-    date_str = current_time.strftime("%Y-%m-%d")  # Get the current date as YYYY-MM-DD format
+    time_str = current_time.strftime("%I:%M:%S %p")  # 24-hour format
+    date_str = current_time.strftime("%Y-%m-%d")  # YYYY-MM-DD format
 
     # Open the CSV file to read previous logins and avoid duplicates
     try:
@@ -29,7 +30,7 @@ def log_student_in(roll_number):
                 if len(row) >= 4 and row[0] == roll_number:  # Ensure there are at least 4 columns
                     # Get the last login date and time for this roll number
                     last_login_date = row[2]
-                    last_login_time = datetime.datetime.strptime(row[1], "%I:%M:%S %p")
+                    last_login_time = datetime.datetime.strptime(row[1], "%H:%M:%S %p")
 
                     # Check if the student is trying to log in on the same day
                     if last_login_date == date_str:
@@ -52,10 +53,10 @@ def log_student_in(roll_number):
             pass
     
     # Log the student's roll number and timestamp if they are not already marked as present
-    login_time = current_time.strftime("%I:%M:%S %p")
+    login_time = current_time.strftime("%H:%M:%S %p")
     
     # Check if the student is late or on time
-    if current_time > cutoff_time:
+    if time_str > cutoff_time1:
         status = 'Late Comer'
     else:
         status = 'On Time'
@@ -105,5 +106,3 @@ while True:
 # Release the capture and close any OpenCV windows
 cap.release()
 cv2.destroyAllWindows()
-
-# No need to call process_attendance since the status is updated immediately
