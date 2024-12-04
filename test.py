@@ -12,7 +12,7 @@ import random
 
 #rng for mobile numbers
 
-'''
+
 # Function to generate a list of 119 random 10-digit numbers starting with 7, 8, or 9
 def generate_random_numbers():
     numbers = []
@@ -23,7 +23,7 @@ def generate_random_numbers():
     return numbers
 
 random_numbers = generate_random_numbers()
-print(random_numbers)'''  # Displaying the first 10 numbers for preview)
+print(random_numbers) # Displaying the first 10 numbers for preview)
 
 #random check for what this code does
 
@@ -41,66 +41,37 @@ print(random_numbers)'''  # Displaying the first 10 numbers for preview)
 
 # List of names
 names = [
-   'Poonam Kumar',
-'Neha Sharma',
-'Komal Gupta',
-'Meera Nair',
-'Anjana Reddy',
-'Lakshmi Iyer',
-'Sneha Patel',
-'Priya Das',
-'Sunita Choudhary',
-'Pooja Singh',
-'Kavita Thakur',
-'Priya Malhotra',
-'Aarti Mehta',
-'Shalini Rao',
-'Neelam Kapoor',
-'Suman Verma',
-'Asha Kulkarni',
-'Seema Joshi',
-'Anjali Bhatia',
-'Rekha Saxena',
-'Sushila Jain',
-'Pooja Aggarwal',
-'Anitha Menon',
-'Deepa Pillai',
-'Priya Deshmukh',
-'Kavita Roy',
-'Sunita Tiwari',
-'Meera Kaul',
-'Anjali Bajaj',
-'Preeti Goel',
-'Neha Sinha',
-'Lakshmi Reddy',
-'Smita Chatterjee',
-'Sushila Rao',
-'Meena Nair',
-'Neelam Kapoor',
-'Sreeja Menon',
-'Rekha Iyer',
-'Pooja Bhat',
-'Sunita Mishra',
-'Neelam Desai',
-'Aarti Kulkarni',
-'Priya Joshi',
-'Sunita Verma',
-'Preeti Gupta',
-'Neelam Thakur',
-'Meenal Saxena',
-'Neha Kaul',
-'Sunita Das',
-'Simran Sharma',
-'Pooja Mehta',
-'Suman Tiwari',
-'Priya Malhotra',
-'Shilpa Choudhary',
-'Geeta Pandey',
-'Sunita Mahajan',
-'Rekha Bansal',
-'Anjali Pillai',
-'Neelam Singh',
-'Sushila Ahuja'
+   Aditi Sharma
+Sneha Gupta
+Sunita Patel
+Aarti Rao
+Neelam Mehta
+Shalini Nair
+Priya Iyer
+Lakshmi Reddy
+Priyanka Das
+Neha Joshi
+Sunita Kulkarni
+Anjali Jain
+Rekha Malhotra
+Seema Kapoor
+Lakshmi Menon
+Shilpa Roy
+Pooja Singh
+Sunita Deshmukh
+Neelam Thakur
+Sushila Bhat
+Sunita Choudhary
+Kavita Aggarwal
+Shalini Mishra
+Neelam Verma""
+Sunita Goel
+Pooja Saxena"
+Anita Khanna"
+Priya Bajaj"
+Meera Tiwari"
+Neelam Kaul"
+
 
 ]
 
