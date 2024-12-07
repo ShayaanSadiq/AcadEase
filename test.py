@@ -1,4 +1,4 @@
-import datetime
+'''import datetime
 import csv
 current_time = datetime.datetime.now()
 login_time = current_time.strftime("%I:%M:%S %p")
@@ -8,7 +8,7 @@ time_str = current_time.strftime("%I:%M:%S %p")
 print(login_time)
 print(cutoff_time1)
 print(time_str)
-import random
+import random'''
 
 #rng for mobile numbers
 
@@ -97,7 +97,7 @@ for x in email_addresses:
 
 
 
-import random
+'''import random
 
 # List of 30 places in Hyderabad
 places = [
@@ -117,3 +117,10 @@ random.shuffle(places)
 print("Places in Hyderabad in random order:")
 for place in places:
     print(place)
+'''
+import mysql.connector as sql
+mydb=sql.connect(host="localhost",user="root",password="root",database="studentdb")
+mycursor=mydb.cursor()
+mycursor.execute("SELECT * FROM studentdb.12b where Name='Arnav Sinha'")
+for x in mycursor:
+    print(x)
