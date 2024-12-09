@@ -67,8 +67,10 @@ def mark_absent():
         table_name='period11b'
     elif(class_section=='twelvea'):
         table_name='period12a'
-    else:
+    elif(class_section=='twelveb'):
         table_name='period12b'
+    else:
+        print("Bad input")
     table_name = f"period{class_section.lower()}"    # Format table name (e.g., period11a)
 
     # Validate class/section and period
