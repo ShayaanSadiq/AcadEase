@@ -61,6 +61,14 @@ def mark_absent():
     class_section = data['class']         # Selected class/section
     period = data['period']               # Selected period (1-6)
 
+    if(class_section=='elevena'):
+        table_name='period11a'
+    elif(class_section=='elevenb'):
+        table_name='period11b'
+    elif(class_section=='twelvea'):
+        table_name='period12a'
+    else:
+        table_name='period12b'
     table_name = f"period{class_section.lower()}"    # Format table name (e.g., period11a)
 
     # Validate class/section and period
@@ -103,3 +111,4 @@ def mark_absent():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
