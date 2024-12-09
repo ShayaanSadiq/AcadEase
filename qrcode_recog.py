@@ -11,162 +11,170 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.widget import Widget
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
+import pymysql
+pymysql.install_as_MySQLdb()
 
-# Define the cutoff time for being "late" (in 24-hour format)
-cutoff_time = datetime.datetime.strptime("09:30:00", "%H:%M:%S")  # 09:30:00 in 24-hour format
+# Define the cutoff time for being "late"
+cutoff_time = datetime.datetime.strptime("09:30:00", "%H:%M:%S")
 
-# Define the valid roll number ranges for different classes/sections
+# Define valid roll number ranges
 valid_roll_number_ranges = [
     (111001, 111030),
     (112001, 112030),
     (121001, 121030),
-    (122001, 122030)
+    (122001, 122030),
 ]
 
-# Function to validate roll number format (6 digits) and check if it's within the valid range
+# Function to validate roll number format and range
 def is_valid_roll_number(roll_number):
-    pattern = re.compile(r'^\d{6}$')
+    pattern = re.compile(r"^\d{6}$")
     if not pattern.match(roll_number):
         return False
-    
     roll_number_int = int(roll_number)
-    
-    # Check if the roll number falls within the valid range
     for start, end in valid_roll_number_ranges:
         if start <= roll_number_int <= end:
             return True
-    
     return False
 
 # Function to connect to the MySQL database
 def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",      # Replace with your MySQL server address if needed
-        user="root",  # Replace with your MySQL username
-        password="acadease27",  # Replace with your MySQL password
-        database="day_att"   # Database name
-    )
+    try:
+        return mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="acadease27",
+            database="day_att",
+            auth_plugin="mysql_native_password",  # Explicitly specify auth plugin
+        )
+    except mysql.connector.Error as e:
+        print(f"Database connection error: {e}")
+        return None
 
 # Function to log student attendance into MySQL
 def log_student_in(roll_number):
     current_time = datetime.datetime.now()
-    current_time_24hr = current_time.strftime("%H:%M:%S")  # 24-hour format time
-    date_str = current_time.strftime("%Y-%m-%d")  # YYYY-MM-DD format
+    time_str = current_time.strftime("%H:%M:%S")
+    date_str = current_time.strftime("%Y-%m-%d")
 
-    # Connect to the MySQL database
     conn = get_db_connection()
+    if not conn:
+        return
     cursor = conn.cursor()
 
-    # Check if the student is already marked as present for today
-    cursor.execute("SELECT * FROM day_attendance WHERE roll_number = %s AND date = %s", (roll_number, date_str))
-    existing_record = cursor.fetchone()
+    try:
+        # Check if already marked
+        cursor.execute(
+            "SELECT * FROM day_attendance WHERE rollno = %s AND date = %s",  # Updated column name
+            (roll_number, date_str),
+        )
+        if cursor.fetchone():
+            print(f"Student {roll_number} already marked as present.")
+            return
 
-    if existing_record:
-        print(f"Student {roll_number} has already been marked as present today.")
+        # Determine attendance status
+        status = "Late Comer" if datetime.datetime.strptime(time_str, "%H:%M:%S") > cutoff_time else "On Time"
+
+        # Insert attendance record
+        cursor.execute(
+            "INSERT INTO day_attendance (rollno, time, date, status) VALUES (%s, %s, %s, %s)",  # Updated column name
+            (roll_number, time_str, date_str, status),
+        )
+        conn.commit()
+        print(f"Student {roll_number} logged in as {status}.")
+    except mysql.connector.Error as e:
+        print(f"Error logging student: {e}")
+    finally:
         cursor.close()
         conn.close()
-        return
-
-    # Check if the student is late or on time
-    if datetime.datetime.strptime(current_time_24hr, "%H:%M:%S") > cutoff_time:
-        status = 'Late Comer'
-    else:
-        status = 'On Time'
-
-    # Insert the attendance record into the database
-    cursor.execute(
-        "INSERT INTO day_attendance (roll_number, time, date, status) VALUES (%s, %s, %s, %s)",
-        (roll_number, current_time_24hr, date_str, status)
-    )
-
-    # Commit the transaction and close the connection
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    print(f"Student {roll_number} logged in at {current_time} as {status}.")
 
 # Kivy App Class
 class QRScannerApp(App):
     def build(self):
-        self.capture = None  # Initialize capture as None
-        
-        # Root layout for the app
-        self.layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
-        
-        # Create the initial logo image widget (this will be shown initially)
-        self.image = Image(source='Acadeaselogo.png')  # Show the logo initially
+        self.capture = None
+
+        # Main layout
+        self.layout = BoxLayout(orientation="vertical", padding=10, spacing=10)
+
+        # Logo
+        self.image = Image(source="Acadeaselogo.png")
         self.layout.add_widget(self.image)
 
-        # Create the Start Scanning button
+        # Start scanning button
         self.button = Button(text="Start Scanning", size_hint=(None, None), size=(200, 50))
-        
-        # Set the button color (RGBA format)
-        self.button.background_color = [0.6, 0.921568627, 1, 1]  # Light blue color
+        self.button.background_color = [0.6, 0.92, 1, 1]
         self.button.bind(on_press=self.start_scanning)
 
-        # Create a BoxLayout for the button and align it to the right
-        button_layout = BoxLayout(size_hint=(1, None), height=50, orientation='horizontal')
-        button_layout.add_widget(Widget())  # Empty Widget for centering
-        button_layout.add_widget(self.button)  # Add the button
-        button_layout.add_widget(Widget())  # Empty Widget for centering
-
-        # Add the button layout (aligned right) to the main layout
+        # Button layout
+        button_layout = BoxLayout(size_hint=(1, None), height=50, orientation="horizontal")
+        button_layout.add_widget(Widget())
+        button_layout.add_widget(self.button)
+        button_layout.add_widget(Widget())
         self.layout.add_widget(button_layout)
 
+        # Schedule attendance table cleanup
+        Clock.schedule_once(self.clean_attendance_table, 86400)  # Run after 24 hours
         return self.layout
 
     def start_scanning(self, instance):
-        """Start the QR code scanning process."""
         print("Scanning started...")
-
-        # Initialize webcam capture only when the button is pressed
-        self.capture = cv2.VideoCapture(0)  
-        
-        # Disable the button once scanning is started
-        self.button.disabled = True  
-
-        # Clear the current layout (to remove the logo image)
+        self.capture = cv2.VideoCapture(0)
+        self.button.disabled = True
         self.layout.clear_widgets()
 
-        # Add the camera feed placeholder before adding the webcam feed
-        self.image = Image()  # This image widget will show the webcam feed
+        # Webcam feed
+        self.image = Image()
         self.layout.add_widget(self.image)
-
-        # Start the OpenCV update clock
-        Clock.schedule_interval(self.update_frame, 1.0 / 30.0)  # 30 FPS update
+        Clock.schedule_interval(self.update_frame, 1.0 / 30.0)  # 30 FPS
 
     def update_frame(self, dt):
-        """Update the frame from the webcam and process QR codes."""
+        if not self.capture:
+            return
         ret, frame = self.capture.read()
-
         if ret:
-            # Rotate the frame (180 degrees)
             frame = cv2.rotate(frame, cv2.ROTATE_180)
-
-            # Decode QR codes from the rotated frame
             decoded_objects = decode(frame)
             for obj in decoded_objects:
-                roll_number = obj.data.decode('utf-8')
+                roll_number = obj.data.decode("utf-8")
                 if is_valid_roll_number(roll_number):
-                    log_student_in(roll_number)  # Log the student in based on QR code data
+                    log_student_in(roll_number)
                     points = obj.polygon
                     if len(points) == 4:
                         pts = [tuple(point) for point in points]
-                        cv2.polylines(frame, [np.array(pts, dtype=np.int32)], isClosed=True, color=(0, 255, 0), thickness=2)
-                        cv2.putText(frame, roll_number, (pts[0][0], pts[0][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+                        cv2.polylines(frame, [np.array(pts, dtype=np.int32)], True, (0, 255, 0), 2)
+                        cv2.putText(
+                            frame,
+                            roll_number,
+                            (pts[0][0], pts[0][1] - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.9,
+                            (0, 255, 0),
+                            2,
+                        )
                 else:
-                    # If the roll number is invalid, print a message
-                    print(f"Invalid QR code: {roll_number} (not in valid roll number range).")
+                    print(f"Invalid QR code: {roll_number}")
 
-            # Convert the frame to texture to display in Kivy window
-            buf = frame.tostring()
-            texture = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='bgr')
-            texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
+            buf = frame.tobytes()
+            texture = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt="bgr")
+            texture.blit_buffer(buf, colorfmt="bgr", bufferfmt="ubyte")
             self.image.texture = texture
 
+    def clean_attendance_table(self, dt=None):
+        conn = get_db_connection()
+        if not conn:
+            return
+        cursor = conn.cursor()
+        try:
+            cursor.execute("DELETE FROM day_attendance")
+            conn.commit()
+            print("Attendance table cleaned.")
+        except mysql.connector.Error as e:
+            print(f"Error cleaning attendance table: {e}")
+        finally:
+            cursor.close()
+            conn.close()
+        Clock.schedule_once(self.clean_attendance_table, 86400)
+
     def on_stop(self):
-        """Release the capture when the application is closed."""
         if self.capture:
             self.capture.release()
 
