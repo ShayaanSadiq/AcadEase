@@ -73,12 +73,6 @@ def mark_absent():
         print("Bad input")
     table_name = f"period{class_section.lower()}"    # Format table name (e.g., period11a)
 
-    # Validate class/section and period
-    if table_name not in ['period11a', 'period11b', 'period12a', 'period12b']:
-        return jsonify({"error": "Invalid class section"}), 400
-    if not (1 <= period <= 6):
-        return jsonify({"error": "Invalid period"}), 400
-
     conn = get_db_connection()
     cursor = conn.cursor()
 
