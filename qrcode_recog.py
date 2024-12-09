@@ -1,7 +1,7 @@
 import cv2
 from pyzbar.pyzbar import decode
 import datetime
-import csv
+import mysql.connector
 import re
 import numpy as np
 from kivy.app import App
@@ -38,51 +38,52 @@ def is_valid_roll_number(roll_number):
     
     return False
 
+# Function to connect to the MySQL database
+def get_db_connection():
+    return mysql.connector.connect(
+        host="localhost",      # Replace with your MySQL server address if needed
+        user="root",  # Replace with your MySQL username
+        password="acadease27",  # Replace with your MySQL password
+        database="day_att"   # Database name
+    )
+
+# Function to log student attendance into MySQL
 def log_student_in(roll_number):
     current_time = datetime.datetime.now()
     current_time_24hr = current_time.strftime("%H:%M:%S")  # 24-hour format time
     date_str = current_time.strftime("%Y-%m-%d")  # YYYY-MM-DD format
 
-    # Open the CSV file to read previous logins and avoid duplicates
-    try:
-        with open('attendance.csv', 'r', newline='') as f:
-            reader = csv.reader(f)
-            rows = list(reader)  # Convert the reader object to a list of rows
+    # Connect to the MySQL database
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-            # Check if the roll number already exists in the attendance file
-            for row in rows:
-                if len(row) >= 4 and row[0] == roll_number:  # Ensure there are at least 4 columns
-                    # Get the last login date and time for this roll number
-                    last_login_date = row[2]
+    # Check if the student is already marked as present for today
+    cursor.execute("SELECT * FROM day_attendance WHERE roll_number = %s AND date = %s", (roll_number, date_str))
+    existing_record = cursor.fetchone()
 
-                    # Check if the student is trying to log in on the same day
-                    if last_login_date == date_str:
-                        print(f"Student {roll_number} has already been marked as present today.")
-                        return  # If already logged in today, do nothing
+    if existing_record:
+        print(f"Student {roll_number} has already been marked as present today.")
+        cursor.close()
+        conn.close()
+        return
 
-                    # If the login is on a different day, allow it
-                    print(f"Student {roll_number} logging in for a new day ({date_str}).")
-
-    except FileNotFoundError:
-        # If the file does not exist, it's the first login attempt, create the file and add headers
-        with open('attendance.csv', 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['roll_number', 'time', 'date', 'status'])  # Add headers to the CSV
-            pass
-    
-    # Log the student's roll number and timestamp if they are not already marked as present
-    login_time = current_time_24hr
-    
     # Check if the student is late or on time
-    if datetime.datetime.strptime(login_time, "%H:%M:%S") > cutoff_time:
+    if datetime.datetime.strptime(current_time_24hr, "%H:%M:%S") > cutoff_time:
         status = 'Late Comer'
     else:
         status = 'On Time'
 
-    with open('attendance.csv', 'a', newline='') as f:
-        writer = csv.writer(f)
-        # Write roll number, login time, date, and status
-        writer.writerow([roll_number, login_time, date_str, status])  # Log the status immediately
+    # Insert the attendance record into the database
+    cursor.execute(
+        "INSERT INTO day_attendance (roll_number, time, date, status) VALUES (%s, %s, %s, %s)",
+        (roll_number, current_time_24hr, date_str, status)
+    )
+
+    # Commit the transaction and close the connection
+    conn.commit()
+    cursor.close()
+    conn.close()
+
     print(f"Student {roll_number} logged in at {current_time} as {status}.")
 
 # Kivy App Class
@@ -118,7 +119,7 @@ class QRScannerApp(App):
     def start_scanning(self, instance):
         """Start the QR code scanning process."""
         print("Scanning started...")
-        
+
         # Initialize webcam capture only when the button is pressed
         self.capture = cv2.VideoCapture(0)  
         
