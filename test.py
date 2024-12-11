@@ -182,9 +182,9 @@ def get_present_count(roll_number):
         total_present = 0
         for row in records:
             total_present += row.count('P')
+        percentage=round((total_present/6)*100,2)
 
-        print(f"Total number of 'P' for Roll Number {roll_number}: {total_present}")
-        list1.append(total_present)
+        list1.append(percentage)
     except mysql.connector.Error as e:
         print("Error while connecting to MySQL:", e)
     finally:
@@ -195,4 +195,5 @@ def get_present_count(roll_number):
 # Example: Replace with the roll number you want to check
 for i in range(111001,111031):
     get_present_count(i)
+
 print(list1)
