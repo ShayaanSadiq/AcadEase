@@ -155,6 +155,8 @@ for roll_number in range(111001, 111031):
 
 print(consolidated_list)'''
 
+
+
 import mysql.connector
 
 list1=[]
@@ -170,13 +172,21 @@ def get_present_count(roll_number):
         
         cursor = connection.cursor()
 
+        query1="""
+            SELECT date 
+            FROM period11a WHERE rollno=%s
+        """
+        cursor.execute(query1, (roll_number,))
+        date=cursor.fetchall()
+        print(date)
+
         # Query to fetch all rows for the given roll number
         query = """
             SELECT period_1, period_2, period_3, period_4, period_5, period_6 
-            FROM period_11a WHERE rollno = %s
+            FROM period11a WHERE rollno = %s
         """
         cursor.execute(query, (roll_number,))
-        records = cursor.fetchall()
+        records = cursor.fetchone()
 
         # Calculate the number of 'P's for the given roll number
         total_present = 0
@@ -197,3 +207,24 @@ for i in range(111001,111031):
     get_present_count(i)
 
 print(list1)
+print(records)
+
+
+from datetime import datetime
+
+def convert_date_format(date_str):
+    # Parse the date string into a datetime object
+    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+    
+    # Get the day, month, and year in the desired format
+    day = date_obj.day
+    day_suffix = 'th' if 11 <= day <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
+    
+    # Use the day with the suffix and format the rest of the date
+    formatted_date = f"{day}{day_suffix} {date_obj.strftime('%b %Y')}"
+    return formatted_date
+
+# Example usage
+date_input = "2024-12-01"
+formatted_date = convert_date_format(date_input)
+print(formatted_date)  # Output: 1st Dec 2024
