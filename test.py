@@ -155,7 +155,7 @@ for roll_number in range(111001, 111031):
 
 print(consolidated_list)'''
 
-
+'''
 
 import mysql.connector
 
@@ -208,7 +208,7 @@ for i in range(111001,111031):
 
 print(list1)
 print(records)
-
+'''
 
 from datetime import datetime
 

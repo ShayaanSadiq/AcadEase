@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'teacher_home_page.dart';
 import 'package:http/http.dart' as http;
 
 void main() => runApp(const AttendanceApp());
@@ -145,6 +146,15 @@ class _AttendancePageState extends State<AttendancePage> {
       appBar: AppBar(
         title: const Text('Attendance App'),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => TeacherHomePage()),
+                ); // Redirect to teacher_home_page
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

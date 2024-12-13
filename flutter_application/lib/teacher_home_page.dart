@@ -3,17 +3,19 @@ import 'teacher_login_page.dart';
 import 'markatt.dart';
 
 class TeacherHomePage extends StatelessWidget {
+  const TeacherHomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Teacher Home'),
+        title: const Text('Teacher Home'),
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            DrawerHeader(
+            const DrawerHeader(
               decoration: BoxDecoration(
                 color: Colors.blue,
               ),
@@ -26,38 +28,38 @@ class TeacherHomePage extends StatelessWidget {
               ),
             ),
             ListTile(
-              title: Text('Student Details'),
+              title: const Text('Student Details'),
               onTap: () {
                 // Navigate to Student Details screen
                 Navigator.pop(context); // Close the drawer
               },
             ),
             ListTile(
-              title: Text('Announcements'),
+              title: const Text('Announcements'),
               onTap: () {
                 // Navigate to Announcements screen
                 Navigator.pop(context); // Close the drawer
               },
             ),
             ListTile(
-              title: Text('Concerns'),
+              title: const Text('Concerns'),
               onTap: () {
                 // Navigate to Concerns screen
                 Navigator.pop(context); // Close the drawer
               },
             ),
             ListTile(
-              title: Text('Upload Student Attendance'),
+              title: const Text('Upload Student Attendance'),
               onTap: () {
                 // Navigate to Upload Student Attendance screen
                 Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => AttendancePage()),
+                MaterialPageRoute(builder: (context) => const AttendancePage()),
                 ); // Close the drawer
               },
             ),
-            Divider(), // Divider between options and logout
+            const Divider(), // Divider between options and logout
             ListTile(
-              title: Text('Log Out'),
+              title: const Text('Log Out'),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
                 // Navigate to the login screen when the user logs out
@@ -70,7 +72,7 @@ class TeacherHomePage extends StatelessWidget {
           ],
         ),
       ),
-      body: Center(
+      body: const Center(
         child: Text(
           'Welcome to the Teacher Home Page!',
           style: TextStyle(fontSize: 18),

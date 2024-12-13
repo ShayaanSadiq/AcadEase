@@ -62,10 +62,10 @@ class ParentHomePage extends StatelessWidget {
               title: Text('Logout'),
               onTap: () {
                 // Replace the current page with ParentLoginPage
-                Navigator.pushReplacement(
+               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => ParentLoginPage()),
-                );
+                ); 
               },
             ),
           ],
