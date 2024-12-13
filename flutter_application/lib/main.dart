@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'select_institution_page.dart';
 import 'select_role_page.dart';
-import 'login_page.dart';
 
 
 void main() {
@@ -18,7 +17,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => SelectInstitutionPage(),
         '/selectRole': (context) => SelectRolePage(),
-        '/login': (context) => LoginPage(),
         
       },
     );

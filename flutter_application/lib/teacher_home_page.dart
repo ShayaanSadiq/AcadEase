@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'teacher_login_page.dart';
+import 'markatt.dart';
 
 class TeacherHomePage extends StatelessWidget {
   @override
@@ -48,7 +50,9 @@ class TeacherHomePage extends StatelessWidget {
               title: Text('Upload Student Attendance'),
               onTap: () {
                 // Navigate to Upload Student Attendance screen
-                Navigator.pop(context); // Close the drawer
+                Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => AttendancePage()),
+                ); // Close the drawer
               },
             ),
             Divider(), // Divider between options and logout
@@ -57,7 +61,10 @@ class TeacherHomePage extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context); // Close the drawer
                 // Navigate to the login screen when the user logs out
-                Navigator.pushReplacementNamed(context, '/login');
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => TeacherLoginPage()),
+                );
               },
             ),
           ],
