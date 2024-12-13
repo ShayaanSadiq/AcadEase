@@ -1,6 +1,6 @@
-// parent_login_page.dart
-
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // For JSON decoding
 import 'parent_home_page.dart'; // Import the Parent Home Page
 
 class ParentLoginPage extends StatefulWidget {
@@ -15,37 +15,65 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  void _login() async {
-    setState(() {
-      _isLoading = true;
-    });
+Future<void> _login() async {
+  setState(() {
+    _isLoading = true;
+  });
 
-    // Simulate a delay for the login process
-    await Future.delayed(const Duration(seconds: 2));
+  String username = _usernameController.text;
+  String password = _passwordController.text;
 
-    String username = _usernameController.text;
-    String password = _passwordController.text;
+  try {
+    // Replace with your Flask API endpoint
+    final url = Uri.parse('http://127.0.0.1:5000/login');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'username': username,
+        'password': password,
+      }),
+    );
 
-    // Mock validation logic
-    if (username == 'taufeeq' && password == 'taufeeq') {
-      setState(() {
-        _isLoading = false;
-      });
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        setState(() {
+          _isLoading = false;
+        });
 
-      // Navigate to Parent Home Page
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => ParentHomePage()),
-      );
-    } else {
+        // Navigate to Parent Home Page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ParentHomePage()),
+        );
+      }
+    } else if (response.statusCode == 401) {
+      // Handle invalid credentials
       setState(() {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid Parent Credentials')),
+        const SnackBar(content: Text('Invalid username or password')),
+      );
+    } else {
+      // Handle server errors
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Server error. Please try again later.')),
       );
     }
+  } catch (e) {
+    setState(() {
+      _isLoading = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {

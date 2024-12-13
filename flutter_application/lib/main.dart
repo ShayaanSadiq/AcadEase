@@ -4,7 +4,7 @@ import 'select_role_page.dart';
 
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -17,8 +17,8 @@ class MyApp extends StatelessWidget {
       title: 'Multi-Page App',
       initialRoute: '/',
       routes: {
-        '/': (context) => SelectInstitutionPage(),
-        '/selectRole': (context) => SelectRolePage(),
+        '/': (context) => const SelectInstitutionPage(),
+        '/selectRole': (context) => const SelectRolePage(),
         
       },
     );

@@ -26,6 +26,7 @@ class AttendancePage extends StatefulWidget {
   const AttendancePage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _AttendancePageState createState() => _AttendancePageState();
 }
 
@@ -46,7 +47,7 @@ class _AttendancePageState extends State<AttendancePage> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5000/get_logged_in_students?class=$selectedClass'),
+        Uri.parse('http://127.0.0.1:5000/get_logged_in_students?class=$selectedClass'),
       );
 
       if (response.statusCode == 200) {
@@ -101,7 +102,7 @@ class _AttendancePageState extends State<AttendancePage> {
         }}");
 
         final response = await http.post(
-          Uri.parse('http://10.0.2.2:5000/mark_absent'),
+          Uri.parse('http://127.0.0.1:5000/mark_absent'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'class': _selectedClass,

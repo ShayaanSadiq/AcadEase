@@ -15,6 +15,47 @@ def get_db_connection():
         database="day_att"        # Replace with your database name
     )
 
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return jsonify({"error": "Username and password are required"}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Debug: Log received credentials
+        print(f"Received username: {username}, password: {password}")
+
+        # Query to match username and password
+        query = """
+        SELECT * FROM user_password 
+        WHERE TRIM(user_name) = %s COLLATE utf8mb4_general_ci 
+        AND TRIM(password) = %s COLLATE utf8mb4_general_ci
+        """
+        cursor.execute(query, (username, password))
+        result = cursor.fetchone()
+
+        # Debug: Log query result
+        print(f"Query result: {result}")
+
+        if result:
+            return jsonify({"status": "success", "message": "Login successful"}), 200
+        else:
+            return jsonify({"status": "failure", "message": "Invalid username or password"}), 401
+    except Exception as e:
+        print(f"Error during login: {e}")
+        return jsonify({"error": "Failed to process login"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+
 # Route to fetch logged-in students for the selected class/section
 @app.route('/get_logged_in_students', methods=['GET'])
 def get_logged_in_students():
