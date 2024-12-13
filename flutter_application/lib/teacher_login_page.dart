@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'teacher_home_page.dart'; // Import the Teacher Home Page
 
 class TeacherLoginPage extends StatefulWidget {
+  const TeacherLoginPage({super.key});
+
   @override
   _TeacherLoginPageState createState() => _TeacherLoginPageState();
 }
@@ -19,7 +21,7 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
     });
 
     // Simulate a delay for the login process
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
 
     String username = _usernameController.text;
     String password = _passwordController.text;
@@ -40,7 +42,7 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid Teacher Credentials')),
+        const SnackBar(content: Text('Invalid Teacher Credentials')),
       );
     }
   }
@@ -49,27 +51,27 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Teacher Login'),
+        title: const Text('Teacher Login'),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   TextField(
                     controller: _usernameController,
-                    decoration: InputDecoration(labelText: 'Username'),
+                    decoration: const InputDecoration(labelText: 'Username'),
                   ),
                   TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(labelText: 'Password'),
+                    decoration: const InputDecoration(labelText: 'Password'),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _login,
-                    child: Text('Login'),
+                    child: const Text('Login'),
                   ),
                 ],
               ),

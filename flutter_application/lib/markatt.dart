@@ -184,7 +184,7 @@ class _AttendancePageState extends State<AttendancePage> {
               items: _periods.map((String period){
                 return DropdownMenuItem<String>(
                   value: period,
-                  child: Text('$period'),
+                  child: Text(period),
                 );
               }).toList(),
               onChanged: (String? newPeriod) {

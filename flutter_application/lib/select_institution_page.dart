@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class SelectInstitutionPage extends StatefulWidget {
+  const SelectInstitutionPage({super.key});
+
   @override
   _SelectInstitutionPageState createState() => _SelectInstitutionPageState();
 }
@@ -17,7 +19,7 @@ class _SelectInstitutionPageState extends State<SelectInstitutionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Select Institution')),
+      appBar: AppBar(title: const Text('Select Institution')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -25,7 +27,7 @@ class _SelectInstitutionPageState extends State<SelectInstitutionPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Select Your Institution',
                   border: OutlineInputBorder(),
                 ),
@@ -42,14 +44,14 @@ class _SelectInstitutionPageState extends State<SelectInstitutionPage> {
                   });
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: selectedInstitution != null
                     ? () {
                         Navigator.pushNamed(context, '/selectRole');
                       }
                     : null,
-                child: Text('Next'),
+                child: const Text('Next'),
               ),
             ],
           ),
