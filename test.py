@@ -155,7 +155,7 @@ for roll_number in range(111001, 111031):
 
 print(consolidated_list)'''
 
-
+'''
 
 import mysql.connector
 
@@ -212,6 +212,8 @@ print(list1)
 
 '''
 
+'''
+
 from datetime import datetime
 
 def convert_date_format(date_str):
@@ -232,3 +234,7 @@ formatted_date = convert_date_format(date_input)
 print(formatted_date)  # Output: 1st Dec 2024
 
 '''
+
+import os
+
+os.chdir("student img")
