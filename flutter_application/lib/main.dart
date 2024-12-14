@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Multi-Page App',
+      title: 'Acadease',
       initialRoute: '/',
       routes: {
         '/': (context) => const SelectInstitutionPage(),

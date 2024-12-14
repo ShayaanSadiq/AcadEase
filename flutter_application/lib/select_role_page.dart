@@ -16,62 +16,139 @@ class _SelectRolePageState extends State<SelectRolePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Select Role')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: selectedRole == 'Parent' ? const Color.fromARGB(255, 144, 143, 143) : const Color.fromARGB(255, 211, 210, 210),
+      appBar: AppBar(
+        title: const Text('Select Role'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.deepPurple.shade200, Colors.deepPurple.shade50],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Card(
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              onPressed: () {
-                setState(() {
-                  selectedRole = 'Parent'; // Set selected role to Parent
-                });
-              },
-              child: const Text('I am a Parent'),
-            ),
-            const SizedBox(height: 20), // Space between Parent and Teacher buttons
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: selectedRole == 'Teacher' ? const Color.fromARGB(255, 142, 143, 142) : const Color.fromARGB(255, 208, 206, 206),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: selectedRole == 'Parent'
+                            ? Colors.deepPurple.shade400
+                            : Colors.deepPurple.shade100,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          selectedRole = 'Parent'; // Set selected role to Parent
+                        });
+                      },
+                      child: const Text(
+                        "I'm a Parent",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white, 
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20), // Space between Parent and Teacher buttons
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: selectedRole == 'Teacher'
+                            ? Colors.deepPurple.shade400
+                            : Colors.deepPurple.shade100,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          selectedRole = 'Teacher'; // Set selected role to Teacher
+                        });
+                      },
+                      child: const Text(
+                        'I am a Teacher',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white, 
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20), // Space between Teacher button and Next button
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                      onPressed: () {
+                        if (selectedRole != null) {
+                          // Proceed only if a role is selected
+                          if (selectedRole == "Parent") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ParentLoginPage()),
+                            );
+                          } else if (selectedRole == "Teacher") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TeacherLoginPage()),
+                            );
+                          }
+                        } else {
+                          // Show a message if no role is selected
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please select a role'),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text(
+                        'Next',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              onPressed: () {
-                setState(() {
-                  selectedRole = 'Teacher'; // Set selected role to Teacher
-                });
-              },
-              child: const Text('I am a Teacher'),
             ),
-            const SizedBox(height: 20), // Space between Teacher button and Next button
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 212, 212, 210)),
-              onPressed: () {
-                if (selectedRole != null) {
-                  // Proceed only if a role is selected
-                  if (selectedRole=="Parent"){
-                  Navigator.push(
-                   context,
-                   MaterialPageRoute(builder: (context) => ParentLoginPage()),
-                  );
-                  }
-                  else if(selectedRole=="Teacher"){
-                   Navigator.push(
-                   context,
-                   MaterialPageRoute(builder: (context) => TeacherLoginPage()),
-                   );
-                  }
-                } else {
-                  // Show a message if no role is selected
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please select a role')),
-                  );
-                }
-              },
-              child: const Text('Next'),
-            ),
-          ],
+          ),
         ),
       ),
     );
