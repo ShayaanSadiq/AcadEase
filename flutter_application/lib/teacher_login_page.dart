@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // For JSON decoding
 import 'teacher_home_page.dart'; // Import the Teacher Home Page
 
 class TeacherLoginPage extends StatefulWidget {
   const TeacherLoginPage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _TeacherLoginPageState createState() => _TeacherLoginPageState();
 }
 
@@ -12,31 +15,57 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void _login() async {
+  Future<void> _tlogin() async {
     setState(() {
     });
-
-    // Simulate a delay for the login process
-    await Future.delayed(const Duration(seconds: 2));
 
     String username = _usernameController.text;
     String password = _passwordController.text;
 
-    // Mock validation logic
-    if (username == 'taufeeq' && password == 'taufeeq') {
-      setState(() {
-      });
-
-      // Navigate to Teacher Home Page
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => TeacherHomePage()),
+    try {
+      // Replace with your Flask API endpoint
+      final url = Uri.parse('http://127.0.0.1:5000/tlogin');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': username,
+          'password': password,
+        }),
       );
-    } else {
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          setState(() {
+          });
+
+          // Navigate to Parent Home Page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => TeacherHomePage()),
+          );
+        }
+      } else if (response.statusCode == 401) {
+        // Handle invalid credentials
+        setState(() {
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid username or password')),
+        );
+      } else {
+        // Handle server errors
+        setState(() {
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Server error. Please try again later.')),
+        );
+      }
+    } catch (e) {
       setState(() {
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid Teacher Credentials')),
+        SnackBar(content: Text('Error: $e')),
       );
     }
   }
@@ -110,7 +139,7 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
                           vertical: 12,
                         ),
                       ),
-                      onPressed: _login,
+                      onPressed: _tlogin,
                       child: const Text(
                         'Login',
                         style: TextStyle(
