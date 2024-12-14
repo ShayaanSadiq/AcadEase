@@ -248,3 +248,98 @@ for i in range(46,61):
     j_new=j_new+2
 
 '''
+
+'''
+
+import base64
+import mysql.connector as sql
+mydb=sql.connect(host="localhost",
+                 user="root",
+                 password="root",
+                 database="studentdb")
+cursor=mydb.cursor()
+rollno=111001
+query="""
+    SELECT img 
+    FROM image
+    WHERE id=%s"""
+cursor.execute(query,(rollno,))
+result=cursor.fetchone()
+img_base64 = base64.b64encode(result[0]).decode('utf-8')
+print(img_base64)
+
+'''
+
+'''
+
+import mysql.connector
+
+# Establish connection
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="root",
+    auth_plugin="mysql_native_password"
+)
+
+
+mycursor = mydb.cursor()
+
+# Use the correct database
+mycursor.execute("USE studentdb")
+
+# Insert image records
+try:
+    query = "INSERT INTO image (id, img) VALUES (%s, %s)"
+    records = [
+        (str(i), f"C:\\Users\\lihas\\Documents\\Shayaan\\AcadEase\\studentimg\\main\\{i}.png")
+        for i in range(122001, 122031)
+    ]
+    mycursor.executemany(query, records)  # Batch insertion
+    mydb.commit()
+    print(f"Inserted {mycursor.rowcount} records successfully.")
+except mysql.connector.Error as err:
+    print(f"Error: {err}")
+
+'''
+
+'''
+
+import mysql.connector
+
+try:
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="root",
+        database="studentdb"
+    )
+    cursor = mydb.cursor()
+
+    query = """
+    INSERT INTO image (id, img)
+    VALUES (%s, LOAD_FILE(%s));
+    """
+
+    # Loop through roll numbers 111001 to 111030
+    for roll_number in range(122001, 122031):
+        # Construct the file path dynamically based on the roll number
+        file_path = f'C:\\ProgramData\\MySQL\\MySQL Server 9.1\\Uploads\\{roll_number}.png'
+        data = (roll_number, file_path)
+
+        try:
+            cursor.execute(query, data)
+            print(f"Image for Roll Number {roll_number} inserted successfully.")
+        except mysql.connector.Error as err:
+            print(f"Error inserting Roll Number {roll_number}: {err}")
+
+    mydb.commit()
+
+except mysql.connector.Error as err:
+    print(f"Database Connection Error: {err}")
+
+finally:
+    cursor.close()
+    mydb.close()
+
+'''
