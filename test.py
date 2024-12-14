@@ -235,6 +235,16 @@ print(formatted_date)  # Output: 1st Dec 2024
 
 '''
 
+'''
+
 import os
 
-os.chdir("student img")
+j_new=122002
+for i in range(46,61):
+    i=str(i)
+    str1="girl"+i+".png"
+    str2=str(j_new)+".png"
+    os.rename(str1,str2)
+    j_new=j_new+2
+
+'''
