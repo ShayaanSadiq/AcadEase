@@ -85,8 +85,6 @@ def student_details():
 
         conn = get_db_connection()
         cursor = conn.cursor()
-
-        # Determine the table based on the roll number
         table_name = ''
         if 111001 <= rollno <= 111030:
             table_name = 'elevena'
@@ -100,43 +98,25 @@ def student_details():
             logging.warning(f"Invalid roll number: {rollno}")
             return jsonify({"error": "Invalid roll number"}), 400
 
-        # Log the table name selected
-        logging.debug(f"Selected table: {table_name}")
-
-
         query = f"""
-            SELECT rollno, Name, `Class/Section`, DOB, `Fathers Name`, `Mothers Name`,
-                `Father Email Address`, `Father Mobile Number`, `Mothers Email Address`,
-                `Mothers Phone Number`, `Student Email Address`, `Student Phone Number`,
-                address
-            FROM {table_name}
-            WHERE rollno = %s
-        """
-        query1 = '''
-            SELECT img FROM image WHERE id = %s
-        '''
-
-        # Log the final query to be executed
-        logging.debug(f"Executing query: {query} with rollno: {rollno}")
+        SELECT rollno, Name, `Class/Section`, DOB, `Fathers Name`, `Mothers Name`,
+            `Father Email Address`, `Father Mobile Number`, `Mothers Email Address`,
+            `Mothers Phone Number`, `Student Email Address`, `Student Phone Number`,
+            address
+        FROM {table_name}
+        WHERE rollno = %s
+    """
 
         cursor.execute(query, (rollno,))
         result = cursor.fetchone()
 
-        cursor.execute(query1, (rollno,))
-        result1 = cursor.fetchone()
-
         logging.debug(f"Query result: {result}")  # Log the result before unpacking
 
         if result:
+            # Unpack the result to match the number of columns (13 values)
             try:
-                # Unpack the result to match the number of columns (13 values)
                 rollno, name, class_section, dob, father_name, mother_name, father_email, father_mobile, \
                 mother_email, mother_mobile, student_email, student_mobile, address = result
-
-                # Convert image data to Base64 if result1 exists
-                img_base64 = None
-                if result1 and result1[0]:
-                    img_base64 = base64.b64encode(result1[0]).decode('utf-8')  # Convert bytes to Base64 string
 
                 # Prepare the response data
                 student_data = {
@@ -153,27 +133,22 @@ def student_details():
                     "student_email": student_email,
                     "student_mobile": student_mobile,
                     "address": address,
-                    "imagePath": img_base64,  # Include the Base64 string for the image
                 }
 
-                logging.info("Student data fetched successfully.")
-                return student_data
-
+                logging.info("Student details fetched successfully.")
+                return jsonify(student_data), 200
             except Exception as e:
-                logging.error(f"Error unpacking query result: {e}")
-                return {"error": "Error processing student details."}
-
+                logging.error(f"Error unpacking result: {str(e)}")
+                return jsonify({"error": "Error processing student details."}), 500
         else:
-            logging.warning(f"No student found with rollno: {rollno}")
-            return {"error": "Student not found."}
-
+            logging.error("No student details found.")
+            return jsonify({"error": "No student found for the given roll number."}), 404
     except Exception as e:
         logging.error(f"Failed to fetch student details: {str(e)}")
         return jsonify({"error": "Failed to fetch student details."}), 500
     finally:
         cursor.close()
         conn.close()
-
 
 @app.route('/tlogin', methods=['POST'])
 def tlogin():

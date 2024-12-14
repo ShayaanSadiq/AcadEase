@@ -7,7 +7,6 @@ class ParentLoginPage extends StatefulWidget {
   const ParentLoginPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _ParentLoginPageState createState() => _ParentLoginPageState();
 }
 
@@ -16,9 +15,6 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _login() async {
-    setState(() {
-    });
-
     String username = _usernameController.text;
     String password = _passwordController.text;
 
@@ -37,33 +33,24 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success') {
-          setState(() {
-          });
-
-          // Navigate to Parent Home Page
+          // After successful login, pass the roll number (username) to the ParentHomePage
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => ParentHomePage()),
+            MaterialPageRoute(
+              builder: (context) => ParentHomePage(loggedInRollNo: username), // Pass the username (roll number)
+            ),
           );
         }
       } else if (response.statusCode == 401) {
-        // Handle invalid credentials
-        setState(() {
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Invalid username or password')),
         );
       } else {
-        // Handle server errors
-        setState(() {
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Server error. Please try again later.')),
         );
       }
     } catch (e) {
-      setState(() {
-      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
