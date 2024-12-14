@@ -155,7 +155,7 @@ for roll_number in range(111001, 111031):
 
 print(consolidated_list)'''
 
-'''
+
 
 import mysql.connector
 
@@ -193,8 +193,10 @@ def get_present_count(roll_number):
         for row in records:
             total_present += row.count('P')
         percentage=round((total_present/6)*100,2)
-
-        list1.append(percentage)
+        if(percentage==100.0):
+            percentage=int(percentage)
+        percentage=str(percentage)
+        list1.append(percentage+'%')
     except mysql.connector.Error as e:
         print("Error while connecting to MySQL:", e)
     finally:
@@ -207,7 +209,7 @@ for i in range(111001,111031):
     get_present_count(i)
 
 print(list1)
-print(records)
+
 '''
 
 from datetime import datetime
@@ -228,3 +230,5 @@ def convert_date_format(date_str):
 date_input = "2024-12-01"
 formatted_date = convert_date_format(date_input)
 print(formatted_date)  # Output: 1st Dec 2024
+
+'''

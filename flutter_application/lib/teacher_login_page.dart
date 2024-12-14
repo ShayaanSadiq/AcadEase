@@ -11,11 +11,9 @@ class TeacherLoginPage extends StatefulWidget {
 class _TeacherLoginPageState extends State<TeacherLoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isLoading = false;
 
   void _login() async {
     setState(() {
-      _isLoading = true;
     });
 
     // Simulate a delay for the login process
@@ -27,7 +25,6 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
     // Mock validation logic
     if (username == 'taufeeq' && password == 'taufeeq') {
       setState(() {
-        _isLoading = false;
       });
 
       // Navigate to Teacher Home Page
@@ -37,7 +34,6 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
       );
     } else {
       setState(() {
-        _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid Teacher Credentials')),
@@ -48,19 +44,14 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Teacher Login'),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-      ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.deepPurple.shade200, Colors.deepPurple.shade50],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: [Color.fromARGB(255, 115, 39, 255), Color.fromARGB(255, 231, 214, 255)],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
           ),
-        ),
+        ),  
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(20.0),

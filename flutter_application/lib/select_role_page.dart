@@ -16,17 +16,12 @@ class _SelectRolePageState extends State<SelectRolePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select Role'),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-      ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.deepPurple.shade200, Colors.deepPurple.shade50],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: [Color.fromARGB(255, 115, 39, 255), Color.fromARGB(255, 231, 214, 255)],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
           ),
         ),
         child: Center(
@@ -90,7 +85,7 @@ class _SelectRolePageState extends State<SelectRolePage> {
                         });
                       },
                       child: const Text(
-                        'I am a Teacher',
+                        "I'm a Teacher",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

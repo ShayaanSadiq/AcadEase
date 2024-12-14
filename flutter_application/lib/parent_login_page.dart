@@ -7,17 +7,16 @@ class ParentLoginPage extends StatefulWidget {
   const ParentLoginPage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _ParentLoginPageState createState() => _ParentLoginPageState();
 }
 
 class _ParentLoginPageState extends State<ParentLoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isLoading = false;
 
   Future<void> _login() async {
     setState(() {
-      _isLoading = true;
     });
 
     String username = _usernameController.text;
@@ -39,7 +38,6 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success') {
           setState(() {
-            _isLoading = false;
           });
 
           // Navigate to Parent Home Page
@@ -51,7 +49,6 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
       } else if (response.statusCode == 401) {
         // Handle invalid credentials
         setState(() {
-          _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Invalid username or password')),
@@ -59,7 +56,6 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
       } else {
         // Handle server errors
         setState(() {
-          _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Server error. Please try again later.')),
@@ -67,7 +63,6 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
       }
     } catch (e) {
       setState(() {
-        _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
@@ -78,17 +73,12 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Parent Login'),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-      ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.deepPurple.shade200, Colors.deepPurple.shade50],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: [Color.fromARGB(255, 115, 39, 255), Color.fromARGB(255, 231, 214, 255)],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
           ),
         ),
         child: Center(

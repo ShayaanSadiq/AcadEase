@@ -4,6 +4,7 @@ class SelectInstitutionPage extends StatefulWidget {
   const SelectInstitutionPage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _SelectInstitutionPageState createState() => _SelectInstitutionPageState();
 }
 
@@ -19,17 +20,12 @@ class _SelectInstitutionPageState extends State<SelectInstitutionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select Institution'),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-      ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.deepPurple.shade200, Colors.deepPurple.shade50],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: [Color.fromARGB(255, 115, 39, 255), Color.fromARGB(255, 231, 214, 255)],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
           ),
         ),
         child: Center(
