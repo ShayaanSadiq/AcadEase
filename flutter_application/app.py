@@ -137,7 +137,7 @@ def student_details():
                 img_base64 = None
                 if result1 and result1[0]:
                     img_base64 = base64.b64encode(result1[0]).decode('utf-8')  # Convert bytes to Base64 string
-
+                    print(img_base64)
                 # Prepare the response data
                 student_data = {
                     "rollno": rollno,
@@ -158,7 +158,8 @@ def student_details():
 
                 logging.info("Student data fetched successfully.")
                 return student_data
-
+                
+                
             except Exception as e:
                 logging.error(f"Error unpacking query result: {e}")
                 return {"error": "Error processing student details."}
