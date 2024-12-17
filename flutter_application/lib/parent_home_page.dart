@@ -14,7 +14,7 @@ class ParentHomePage extends StatefulWidget {
 }
 
 class _ParentHomePageState extends State<ParentHomePage> {
-  final String apiUrl = 'http://127.0.0.1:5000/student_details'; // API URL
+  final String apiUrl = 'http://10.0.2.2:5000/student_details'; // API URL
   late Future<Map<String, dynamic>> _studentDetails;
 
   // Function to fetch student details from the API
