@@ -43,7 +43,7 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
           // Navigate to Parent Home Page
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => TeacherHomePage()),
+            MaterialPageRoute(builder: (context) => const TeacherHomePage()),
           );
         }
       } else if (response.statusCode == 401) {

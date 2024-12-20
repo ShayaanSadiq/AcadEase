@@ -65,7 +65,7 @@ class TeacherHomePage extends StatelessWidget {
                 // Navigate to the login screen when the user logs out
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => TeacherLoginPage()),
+                  MaterialPageRoute(builder: (context) => const TeacherLoginPage()),
                 );
               },
             ),
