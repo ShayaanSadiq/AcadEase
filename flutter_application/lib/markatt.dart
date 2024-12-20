@@ -152,7 +152,7 @@ class _AttendancePageState extends State<AttendancePage> {
           onPressed: () {
             Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => TeacherHomePage()),
+                  MaterialPageRoute(builder: (context) => const TeacherHomePage()),
                 ); // Redirect to teacher_home_page
           },
         ),

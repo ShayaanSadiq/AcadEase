@@ -275,7 +275,7 @@ def mark_absent():
     cursor = conn.cursor()
 
     today_date = datetime.now().strftime('%Y-%m-%d')  # Get today's date in 'YYYY-MM-DD' format
-    period_column = f"period_{period}"              # Format period column name (e.g., period_1)
+    period_column = f"{period}"              # Format period column name (e.g., period_1)
 
     try:
         # Mark students who are not logged in as 'A' for all periods
