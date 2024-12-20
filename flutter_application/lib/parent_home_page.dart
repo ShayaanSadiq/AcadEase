@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'package:AcadEase/student_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
 import 'parent_login_page.dart';
-import 'studentdetailpt.dart';
 
 class ParentHomePage extends StatefulWidget {
   final String loggedInRollNo;
@@ -15,7 +15,7 @@ class ParentHomePage extends StatefulWidget {
 }
 
 class _ParentHomePageState extends State<ParentHomePage> {
-  final String apiUrl = 'http://127.0.0.1:5000/student_details';
+  final String apiUrl = 'http://10.0.2.2:5000/student_details';
   late Future<Map<String, dynamic>> _studentDetails;
 
   Future<Map<String, dynamic>> fetchStudentDetails() async {
@@ -88,7 +88,7 @@ class _ParentHomePageState extends State<ParentHomePage> {
                 // Navigate to the login screen when the user logs out
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => StudentDetailsPage()),
+                  MaterialPageRoute(builder: (context) => const StudentDetailsPage(loggedInRollNo: '111001',)),
                 );
               },
             ),
@@ -140,7 +140,7 @@ class _ParentHomePageState extends State<ParentHomePage> {
             children: [
               const SizedBox(height: 10),
               Padding(
-                padding: const EdgeInsets.only(top: 40), // Adjust the top padding value here
+                padding: const EdgeInsets.only(top: 63), // Adjust the top padding value here
                 child: FutureBuilder<Map<String, dynamic>>(
                   future: _studentDetails,
                   builder: (context, snapshot) {
