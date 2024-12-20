@@ -187,12 +187,12 @@ print(consolidated_list)
 
 #MAIN code to calculate percentage from period11a, period11b etc
 
-
+'''
 
 import mysql.connector
 
 list1=[]
-def get_present_count(roll_number):
+def get_present_count(roll_number,period):
     try:
         # Connect to the MySQL database
         connection = mysql.connector.connect(
@@ -204,18 +204,18 @@ def get_present_count(roll_number):
         
         cursor = connection.cursor()
 
-        query1="""
+        query1=f"""
             SELECT date 
-            FROM period11a WHERE rollno=%s
+            FROM {period} WHERE rollno={roll_number}
         """
-        cursor.execute(query1, (roll_number,))
+        cursor.execute(query1)
         date=cursor.fetchall()
         # Query to fetch all rows for the given roll number
-        query = """
+        query = f"""
             SELECT period_1, period_2, period_3, period_4, period_5, period_6 
-            FROM period11a WHERE rollno = %s
+            FROM {period} WHERE rollno = {roll_number}
         """
-        cursor.execute(query, (roll_number,))
+        cursor.execute(query)
         records = cursor.fetchone()
 
         # Calculate the number of 'P's for the given roll number
@@ -235,11 +235,17 @@ def get_present_count(roll_number):
 
 # Example: Replace with the roll number you want to check
 for i in range(111001,111031):
-    get_present_count(i)
+    get_present_count(i,"period11a")
+for i in range(112001,112031):
+    get_present_count(i,"period11b")
+for i in range(121001,121031):
+    get_present_count(i,"period12a")
+for i in range(122001,122031):
+    get_present_count(i,"period12b")
 
 print(list1)
 
-
+'''
 
 #code to change date in words to date in numbers
 
@@ -524,3 +530,21 @@ ALTER TABLE `studentdb`.`month_att` CHANGE COLUMN `2025-01-30` `2025-01-30` INT 
 ALTER TABLE `studentdb`.`month_att` CHANGE COLUMN `2025-01-31` `2025-01-31` INT NULL DEFAULT NULL;
 
 '''
+
+#code to randomize marks and attendance
+
+
+
+import random
+'''list1=[20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,60]
+for i in range(1,121):
+    print(random.choice(list1))
+
+import random
+list1=['P','A']
+for i in range(1,31):
+    print(random.choice(list1))
+'''
+list1=[0,16.67,33.33,50,66.67,83.33,100]
+for i in range(1,121):
+    print(random.choice(list1))

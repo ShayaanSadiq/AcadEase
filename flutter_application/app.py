@@ -1,5 +1,6 @@
 from unittest import result
 import pymysql
+import mysql.connector
 from flask import Flask, g, jsonify, request
 from datetime import datetime
 from flask_cors import CORS
