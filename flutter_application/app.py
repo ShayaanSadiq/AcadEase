@@ -18,8 +18,8 @@ def get_db_connection():
         conn = pymysql.connect(
             host="localhost",
             user="root",
-            password="acadease27",
-            database="day_att"
+            password="root",
+            database="studentdb"
         )
         logging.debug("Database connection established.")
         return conn
@@ -108,7 +108,7 @@ def student_details():
             SELECT rollno, Name, `Class/Section`, DOB, `Fathers Name`, `Mothers Name`,
                 `Father Email Address`, `Father Mobile Number`, `Mothers Email Address`,
                 `Mothers Phone Number`, `Student Email Address`, `Student Phone Number`,
-                address
+                `address`
             FROM {table_name}
             WHERE rollno = %s
         """
