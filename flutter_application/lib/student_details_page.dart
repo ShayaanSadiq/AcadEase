@@ -4,23 +4,23 @@ import 'package:http/http.dart' as http;
 import 'parent_login_page.dart';
 
 class StudentDetailsPage extends StatefulWidget {
-  final String loggedInRollNo;
+  final dynamic loggedInRollNo1;
 
-  const StudentDetailsPage({super.key, required this.loggedInRollNo});
+  const StudentDetailsPage({super.key, required this.loggedInRollNo1});
 
   @override
    _StudentDetailsPageState createState() => _StudentDetailsPageState();
 }
 
 class _StudentDetailsPageState extends State<StudentDetailsPage> {
-  final String apiUrl = 'http://10.0.2.2:5000/student_details';
+  final String apiUrl = 'http://127.0.0.1:5000/student_details';
   late Future<Map<String, dynamic>> _studentDetails;
 
   Future<Map<String, dynamic>> fetchStudentDetails() async {
     final response = await http.post(
       Uri.parse(apiUrl),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({'rollno': widget.loggedInRollNo}),
+      body: json.encode({'rollno': widget.loggedInRollNo1}),
     );
 
     if (response.statusCode == 200) {
@@ -80,14 +80,7 @@ Widget build(BuildContext context) {
           ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
-              onTap: () {
-                Navigator.pop(context); // Close the drawer
-                // Navigate to the login screen when the user logs out
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const StudentDetailsPage(loggedInRollNo: '111001',)),
-                );
-              },
+              onTap: () {},
             ),
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
@@ -156,13 +149,12 @@ Widget build(BuildContext context) {
                         decoration: BoxDecoration(
                           color: Colors.deepPurple.shade50,
                           shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(1),
                           border: Border.all(color: Colors.deepPurple, width: 2),
                         ),
-                        child: const Icon(
-                          Icons.person,
-                          size: 80,
-                          color: Colors.deepPurple,
+                        child: Image.memory(
+                          base64Decode(student['imagePath']),
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
@@ -219,7 +211,7 @@ Widget build(BuildContext context) {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: const Color.fromRGBO(149, 117, 205, 1)),
+          borderSide: const BorderSide(color: Color.fromRGBO(149, 117, 205, 1)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
