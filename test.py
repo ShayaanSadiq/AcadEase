@@ -544,7 +544,47 @@ import random
 list1=['P','A']
 for i in range(1,31):
     print(random.choice(list1))
-'''
+
 list1=[0,16.67,33.33,50,66.67,83.33,100]
 for i in range(1,121):
     print(random.choice(list1))
+
+'''
+
+#test
+    
+'''
+'rollno':111001, 
+      'name':'Aarav Sharma', 
+      'class_section':'11-A', 
+      'dob':'15-01-2007',
+      'father_name':'Raj Sharma',
+      'mother_name':'Aditi Sharma',
+      'father_email':'rajsharma@gmail.com',
+      'student_mobile':'8134210901',
+      'student_email':'asharma@outlook.com',
+      'father_mobile':7963068247, 
+      'mother_email':'aditisharma@outlook.com',
+      'mother_mobile':9505560591, 
+      'address':'LB Nagar'
+'''
+
+import pymysql
+import io
+from PIL import Image
+
+connection=pymysql.connect(host="localhost",
+                 user="root",
+                 passwd="root",
+                 db="studentdb")
+cursor=connection.cursor()
+sql1 = 'select img from image'
+cursor.execute(sql1)
+data2 = cursor.fetchall()
+
+file_like2 = io.BytesIO(data2[0][0])
+
+img1=Image.open(file_like2)
+img1.show()
+cursor.close()
+connection.close()

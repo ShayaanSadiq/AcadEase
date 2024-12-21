@@ -15,7 +15,7 @@ class ParentHomePage extends StatefulWidget {
 }
 
 class _ParentHomePageState extends State<ParentHomePage> {
-  final String apiUrl = 'http://127.0.0.1:5000/student_details';
+  final String apiUrl = 'http://10.0.2.2:5000/student_details';
   late Future<Map<String, dynamic>> _studentDetails;
 
   Future<Map<String, dynamic>> fetchStudentDetails() async {
@@ -152,9 +152,22 @@ class _ParentHomePageState extends State<ParentHomePage> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
+                        return Center(
+                          child: Text(
+                            'Error: ${snapshot.error}',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        );
                     } else if (snapshot.hasData) {
-                      var student = snapshot.data!;
+                      final student = snapshot.data!;
+                      if (student.containsKey('error')) {
+                        return Center(
+                          child: Text(
+                            'Error: ${student['error']}',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        );
+                      }
                       return Card(
                         elevation: 3,
                         margin: const EdgeInsets.all(10),

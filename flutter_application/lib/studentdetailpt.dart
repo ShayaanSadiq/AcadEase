@@ -17,7 +17,7 @@ class StudentDetailsPage extends StatefulWidget {
 }
 
 class _StudentDetailsPageState extends State<StudentDetailsPage> {
-  final String apiUrl = 'http://127.0.0.1:5000/student_details'; // Replace with your host machine's IP
+  final String apiUrl = 'http://10.0.2.2:5000/student_details'; // Replace with your host machine's IP
   late Future<Map<String, dynamic>> _studentDetails;
 
   Future<Map<String, dynamic>> fetchStudentDetails() async {
@@ -97,19 +97,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StudentDetailsPage( // Pass the rollNo parameter
-                      loggedInRollNo: widget.loggedInRollNo, // Pass the loggedInRollNo parameter
-                    ),
-                  ),
-                );
-              },
-
-
+              onTap: () {},
             ),
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
