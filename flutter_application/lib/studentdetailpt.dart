@@ -98,19 +98,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StudentDetailsPage( // Pass the rollNo parameter
-                      loggedInRollNo: widget.loggedInRollNo, // Pass the loggedInRollNo parameter
-                    ),
-                  ),
-                );
-              },
-
-
+              onTap: () {},
             ),
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
