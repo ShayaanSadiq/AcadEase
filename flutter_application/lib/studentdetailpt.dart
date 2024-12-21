@@ -1,20 +1,47 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-void main() {
-  runApp(MyApp());
-}
+class StudentDetailsPage extends StatefulWidget {
+  final String loggedInRollNo;
 
-class MyApp extends StatelessWidget {
+  const StudentDetailsPage({
+    Key? key,
+    required this.loggedInRollNo,
+  }) : super(key: key);
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: StudentDetailsPage(),
-    );
-  }
+  _StudentDetailsPageState createState() => _StudentDetailsPageState();
 }
 
-class StudentDetailsPage extends StatelessWidget {
+class _StudentDetailsPageState extends State<StudentDetailsPage> {
+  final String apiUrl = 'http://127.0.0.1:5000/student_details'; // Replace with your host machine's IP
+  late Future<Map<String, dynamic>> _studentDetails;
+
+  Future<Map<String, dynamic>> fetchStudentDetails() async {
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'rollno': widget.loggedInRollNo}),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {'error': 'Failed to fetch details: ${response.statusCode}'};
+      }
+    } catch (e) {
+      return {'error': 'Network error: $e'};
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _studentDetails = fetchStudentDetails();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,31 +88,6 @@ class StudentDetailsPage extends StatelessWidget {
               title: const Text('Student Details'),
               onTap: () {},
             ),
-            ListTile(
-              leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
-              title: const Text('Announcements'),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
-              title: const Text('Apply for Leave'),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.announcement, color: Colors.deepPurple),
-              title: const Text('Concerns'),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
-              title: const Text('Contact Us'),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.deepPurple),
-              title: const Text('Logout'),
-              onTap: () {},
-            ),
           ],
         ),
       ),
@@ -97,82 +99,107 @@ class StudentDetailsPage extends StatelessWidget {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple.shade50,
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.deepPurple, width: 2),
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      size: 80,
-                      color: Colors.deepPurple,
-                    ),
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: _studentDetails,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (snapshot.hasData) {
+              final student = snapshot.data!;
+              if (student.containsKey('error')) {
+                return Center(
+                  child: Text(
+                    'Error: ${student['error']}',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                );
+              }
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.deepPurple.shade50,
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.deepPurple, width: 2),
+                          ),
+                          child: (student['imagePath'] != null && student['imagePath'] is String)
+                              ? Image.memory(
+                                  base64Decode(student['imagePath']),
+                                  fit: BoxFit.cover,
+                                )
+                              : const Icon(
+                                  Icons.person,
+                                  size: 80,
+                                  color: Colors.deepPurple,
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Name', student['name']),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Roll No', student['rollno'].toString()),
+                      const SizedBox(height: 16), // Ensure it's converted to a String
+                      _buildDetailRow('Date of Birth', student['dob']),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Class/Section', student['class_section'].toString()),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Student Email', student['student_email'].toString()),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Student Phone', student['student_mobile'].toString()),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Father Name', student['father_name'].toString()),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Father Phone', student['father_mobile'].toString()),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Father Email', student['father_email'].toString()),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Mother Name', student['mother_name'].toString()),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Mother Phone', student['mother_mobile'].toString()),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Mother Email', student['mother_email'].toString()),
+                      const SizedBox(height: 16),
+                      _buildDetailRow('Address', student['address'].toString()),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                _buildTextField('Name :'),
-                const SizedBox(height: 16),
-                _buildTextField('Roll No :'),
-                const SizedBox(height: 16),
-                _buildTextField('Date of Birth :'),
-                const SizedBox(height: 16),
-                _buildTextField('Class/Section :'),
-                const SizedBox(height: 32),
-                _buildTextField('Student Email :'),
-                const SizedBox(height: 16),
-                _buildTextField('Student Phone :'),
-                const SizedBox(height: 16),
-                _buildTextField('Father Name :'),
-                const SizedBox(height: 16),
-                _buildTextField('Father Phone :'),
-                const SizedBox(height: 16),
-                _buildTextField('Father Email :'),
-                const SizedBox(height: 16),
-                _buildTextField('Mother Name :'),
-                const SizedBox(height: 16),
-                _buildTextField('Mother Phone :'),
-                const SizedBox(height: 16),
-                _buildTextField('Mother Email :'),
-                const SizedBox(height: 16),
-                _buildTextField('Address :'),
-              ],
-            ),
-          ),
+              );
+            } else {
+              return const Center(child: Text('No data available'));
+            }
+          },
         ),
       ),
     );
   }
 
-  Widget _buildTextField(String labelText) {
-    return TextField(
-      decoration: InputDecoration(
-        labelText: labelText,
-        labelStyle: const TextStyle(color: Colors.deepPurple),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.deepPurple),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: const Color.fromRGBO(149, 117, 205, 1)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
-        ),
-        filled: true,
-        fillColor: Colors.deepPurple.shade50,
+  Widget _buildDetailRow(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label: ',
+            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.deepPurple),
+          ),
+          Expanded(
+            child: Text(
+              value ?? 'N/A',
+              style: const TextStyle(color: Colors.black),
+            ),
+          ),
+        ],
       ),
     );
   }

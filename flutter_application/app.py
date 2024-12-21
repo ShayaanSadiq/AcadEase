@@ -18,8 +18,8 @@ def get_db_connection():
         conn = pymysql.connect(
             host="localhost",
             user="root",
-            password="root",
-            database="studentdb"
+            password="acadease27",
+            database="day_att"
         )
         logging.debug("Database connection established.")
         return conn
@@ -137,8 +137,7 @@ def student_details():
                 img_base64 = None
                 if result1 and result1[0]:
                     img_base64 = base64.b64encode(result1[0]).decode('utf-8')  # Convert bytes to Base64 string
-                    print(img_base64)
-                # Prepare the response data
+                         # Prepare the response data
                 student_data = {
                     "rollno": rollno,
                     "name": name,

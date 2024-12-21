@@ -84,13 +84,18 @@ class _ParentHomePageState extends State<ParentHomePage> {
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
-                // Navigate to the login screen when the user logs out
-                Navigator.pushReplacement(
+                Navigator.pop(context);
+                Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => StudentDetailsPage()),
+                  MaterialPageRoute(
+                    builder: (context) => StudentDetailsPage( // Pass the rollNo parameter
+                      loggedInRollNo: widget.loggedInRollNo, // Pass the loggedInRollNo parameter
+                    ),
+                  ),
                 );
               },
+
+
             ),
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
@@ -255,3 +260,11 @@ class _ParentHomePageState extends State<ParentHomePage> {
     );
   }
 }
+
+extension IntToString on int {
+  String toStringExtension() {
+    return this.toString();  // Converts int to String
+  }
+}
+
+
