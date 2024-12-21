@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'parent_login_page.dart';
+import 'parent_home_page.dart';
 
 class StudentDetailsPage extends StatefulWidget {
   final String loggedInRollNo;
@@ -45,20 +47,21 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('AcadEase'),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: const Text(
+          'Student Details',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
+        centerTitle: true,
       ),
-      drawer: Drawer(
+      extendBodyBehindAppBar: true,
+     drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -81,12 +84,64 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
             ListTile(
               leading: const Icon(Icons.home, color: Colors.deepPurple),
               title: const Text('Home'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ParentHomePage(loggedInRollNo: widget.loggedInRollNo),
+                  ),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StudentDetailsPage( // Pass the rollNo parameter
+                      loggedInRollNo: widget.loggedInRollNo, // Pass the loggedInRollNo parameter
+                    ),
+                  ),
+                );
+              },
+
+
+            ),
+            ListTile(
+              leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
+              title: const Text('Announcements'),
               onTap: () {},
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
+              title: const Text('Apply for Leave'),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: const Icon(Icons.announcement, color: Colors.deepPurple),
+              title: const Text('Concerns'),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
+              title: const Text('Contact Us'),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.deepPurple),
+              title: const Text('Logout'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                // Navigate to the login screen when the user logs out
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ParentLoginPage()),
+                );
+              },
             ),
           ],
         ),
@@ -118,7 +173,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
               }
               return SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.only(top: 63),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -183,24 +238,39 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
     );
   }
 
-  Widget _buildDetailRow(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.deepPurple),
+    Widget _buildDetailRow(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.deepPurple,
           ),
-          Expanded(
-            child: Text(
-              value ?? 'N/A',
-              style: const TextStyle(color: Colors.black),
+        ),
+        const SizedBox(height: 8), // Space between label and value
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.deepPurple, width: 1.5),
+          ),
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 }
