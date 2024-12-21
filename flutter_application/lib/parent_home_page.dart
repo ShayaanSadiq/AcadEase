@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'package:AcadEase/announcement_P.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
 import 'parent_login_page.dart';
 import 'studentdetailpt.dart';
+
 
 class ParentHomePage extends StatefulWidget {
   final String loggedInRollNo;
@@ -15,7 +17,7 @@ class ParentHomePage extends StatefulWidget {
 }
 
 class _ParentHomePageState extends State<ParentHomePage> {
-  final String apiUrl = 'http://127.0.0.1:5000/student_details';
+  final String apiUrl = 'http://10.0.2.2:5000/student_details';
   late Future<Map<String, dynamic>> _studentDetails;
 
   Future<Map<String, dynamic>> fetchStudentDetails() async {
@@ -100,7 +102,14 @@ class _ParentHomePageState extends State<ParentHomePage> {
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
               title: const Text('Announcements'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                // Navigate to the login screen when the user logs out
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AnnouncementsPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
