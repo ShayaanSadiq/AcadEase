@@ -95,19 +95,30 @@ def student_details():
         # Fetch student details
         student_query = f"""
             SELECT `rollno`, `Name`, `Class/Section`, `DOB`, `Fathers Name`, `Mothers Name`,
-                `Father Email Address`, `Father Mobile Number`, `Mothers Email Address`,
-                `Mothers Phone Number`, `Student Email Address`, `Student Phone Number`, `address`
+            `Father Email Address`, `Father Mobile Number`, `Mothers Email Address`,
+            `Mothers Phone Number`, `Student Email Address`, `Student Phone Number`, `address`
             FROM {table_name}
             WHERE rollno = %s
         """
         cursor.execute(student_query, (rollno,))
         student = cursor.fetchone()
-
+        '''
         # Fetch image path (assume image URLs stored in DB)
-        image_query = "SELECT img FROM image WHERE id = %s"
-        cursor.execute(image_query, (rollno,))
-        image = cursor.fetchone()
-
+        query = "SELECT img FROM image WHERE id = %s"
+        cursor.execute(query, (rollno,))
+        result = cursor.fetchone()
+        
+        # Convert image bytes to PIL image
+        image = Image.open(io.BytesIO(result[0]))
+            
+        # Resize and compress image
+        image.thumbnail((200, 200))  # Resize image to 200x200
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='JPEG', quality=50)  # Compress with 50% quality
+            
+        # Encode to Base64
+        img_base64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
+        '''
         if student:
             student_data = {
                 "rollno": student[0],
@@ -123,9 +134,8 @@ def student_details():
                 "student_email": student[10],
                 "student_mobile": student[11],
                 "address": student[12],
-                "image_url": image[0] if image else None
             }
-            return jsonify(student_data), 200
+            return jsonify(student_data)
         else:
             return jsonify({"error": "Student not found"}), 404
 
@@ -279,3 +289,4 @@ def mark_absent():
 
 if __name__ == '__main__':
     app.run(debug=True)
+

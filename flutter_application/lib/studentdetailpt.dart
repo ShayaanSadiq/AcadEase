@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'package:AcadEase/parent_home_page.dart';
+import 'package:AcadEase/parent_login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'parent_login_page.dart';
-import 'parent_home_page.dart';
+/*import 'parent_login_page.dart';
+import 'parent_home_page.dart';*/
 
 class StudentDetailsPage extends StatefulWidget {
   final String loggedInRollNo;
@@ -17,7 +19,7 @@ class StudentDetailsPage extends StatefulWidget {
 }
 
 class _StudentDetailsPageState extends State<StudentDetailsPage> {
-  final String apiUrl = 'http://10.0.2.2:5000/student_details'; // Replace with your host machine's IP
+  final String apiUrl = 'http://127.0.0.1:5000/student_details';
   late Future<Map<String, dynamic>> _studentDetails;
 
   Future<Map<String, dynamic>> fetchStudentDetails() async {
@@ -29,7 +31,8 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
       );
 
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        final data = json.decode(response.body);
+        return data;
       } else {
         return {'error': 'Failed to fetch details: ${response.statusCode}'};
       }
@@ -47,7 +50,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         title: const Text(
@@ -61,7 +64,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
         centerTitle: true,
       ),
       extendBodyBehindAppBar: true,
-     drawer: Drawer(
+      drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -85,7 +88,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
               leading: const Icon(Icons.home, color: Colors.deepPurple),
               title: const Text('Home'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context); 
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -123,8 +126,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
               leading: const Icon(Icons.logout, color: Colors.deepPurple),
               title: const Text('Logout'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
-                // Navigate to the login screen when the user logs out
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const ParentLoginPage()),
@@ -159,6 +161,10 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                   ),
                 );
               }
+
+              final imagePath = 'assets/stdimg/${student['rollno']}.png';
+
+
               return SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.only(top: 63),
@@ -175,43 +181,32 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: Colors.deepPurple, width: 2),
                           ),
-                          child: (student['imagePath'] != null && student['imagePath'] is String)
-                              ? Image.memory(
-                                  base64Decode(student['imagePath']),
-                                  fit: BoxFit.cover,
-                                )
-                              : const Icon(
-                                  Icons.person,
-                                  size: 80,
-                                  color: Colors.deepPurple,
-                                ),
+                          child: Image.asset(
+                            imagePath,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.error,
+                                color: Colors.red,
+                                size: 40,
+                              );
+                            },
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
                       _buildDetailRow('Name', student['name']),
-                      const SizedBox(height: 16),
                       _buildDetailRow('Roll No', student['rollno'].toString()),
-                      const SizedBox(height: 16), // Ensure it's converted to a String
                       _buildDetailRow('Date of Birth', student['dob']),
-                      const SizedBox(height: 16),
                       _buildDetailRow('Class/Section', student['class_section'].toString()),
-                      const SizedBox(height: 16),
                       _buildDetailRow('Student Email', student['student_email'].toString()),
-                      const SizedBox(height: 16),
                       _buildDetailRow('Student Phone', student['student_mobile'].toString()),
-                      const SizedBox(height: 16),
                       _buildDetailRow('Father Name', student['father_name'].toString()),
-                      const SizedBox(height: 16),
                       _buildDetailRow('Father Phone', student['father_mobile'].toString()),
-                      const SizedBox(height: 16),
                       _buildDetailRow('Father Email', student['father_email'].toString()),
-                      const SizedBox(height: 16),
                       _buildDetailRow('Mother Name', student['mother_name'].toString()),
-                      const SizedBox(height: 16),
                       _buildDetailRow('Mother Phone', student['mother_mobile'].toString()),
-                      const SizedBox(height: 16),
                       _buildDetailRow('Mother Email', student['mother_email'].toString()),
-                      const SizedBox(height: 16),
                       _buildDetailRow('Address', student['address'].toString()),
                     ],
                   ),
@@ -226,39 +221,38 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
     );
   }
 
-    Widget _buildDetailRow(String label, String value) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.deepPurple,
-          ),
-        ),
-        const SizedBox(height: 8), // Space between label and value
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.deepPurple.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.deepPurple, width: 1.5),
-          ),
-          child: Text(
-            value,
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
             style: const TextStyle(
-              fontSize: 16,
-              color: Colors.black87,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple,
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
-
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.deepPurple.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.deepPurple, width: 1.5),
+            ),
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
