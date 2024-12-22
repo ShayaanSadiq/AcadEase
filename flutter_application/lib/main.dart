@@ -1,10 +1,15 @@
+import 'package:AcadEase/select_institution_page.dart';
 import 'package:flutter/material.dart';
-import 'select_institution_page.dart';
-import 'select_role_page.dart';
-
+import 'package:provider/provider.dart';
+import 'UserProvider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => UserProvider(), // Initialize provider
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -12,15 +17,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Acadease',
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SelectInstitutionPage(),
-        '/selectRole': (context) => const SelectRolePage(),
-        
-      },
+      home: SelectInstitutionPage(), // Starting point
     );
   }
 }

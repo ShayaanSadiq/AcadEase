@@ -1,12 +1,18 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // For JSON decoding
 import 'parent_home_page.dart'; // Import the Parent Home Page
+import 'package:provider/provider.dart';
+import 'UserProvider.dart';
+
 
 class ParentLoginPage extends StatefulWidget {
   const ParentLoginPage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _ParentLoginPageState createState() => _ParentLoginPageState();
 }
 
@@ -33,13 +39,27 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success') {
-          // After successful login, pass the roll number (username) to the ParentHomePage
+          // After successful login, store the username in UserProvider
+          // ignore: duplicate_ignore
+          // ignore: use_build_context_synchronously
+          Provider.of<UserProvider>(context, listen: false).setUsername(username);
+
+          // Navigate to ParentHomePage with the username as the logged-in roll number
           Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-            builder: (context) => ParentHomePage(loggedInRollNo: username),
-            ),
-          );
+              // ignore: duplicate_ignore
+              // ignore: use_build_context_synchronously
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  // Get the username from UserProvider
+                  final username = Provider.of<UserProvider>(context, listen: false).username;
+                  
+                  // Pass the username to ParentHomePage
+                  return ParentHomePage(username: username);
+                },
+              ),
+            );
+
         }
       } else if (response.statusCode == 401) {
         ScaffoldMessenger.of(context).showSnackBar(

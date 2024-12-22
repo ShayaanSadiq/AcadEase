@@ -1,10 +1,10 @@
+import 'package:AcadEase/select_role_page.dart';
 import 'package:flutter/material.dart';
 
 class SelectInstitutionPage extends StatefulWidget {
   const SelectInstitutionPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _SelectInstitutionPageState createState() => _SelectInstitutionPageState();
 }
 
@@ -76,11 +76,17 @@ class _SelectInstitutionPageState extends State<SelectInstitutionPage> {
                     ElevatedButton(
                       onPressed: selectedInstitution != null
                           ? () {
-                              Navigator.pushNamed(context, '/selectRole');
+                              // Navigate to SelectRolePage when institution is selected
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SelectRolePage(),
+                                ),
+                              );
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:  Colors.deepPurple,
+                        backgroundColor: Colors.deepPurple,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -94,7 +100,8 @@ class _SelectInstitutionPageState extends State<SelectInstitutionPage> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,                        ),
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],

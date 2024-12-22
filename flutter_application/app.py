@@ -3,7 +3,6 @@ import pymysql
 from flask import Flask, g, jsonify, request
 from datetime import datetime
 from flask_cors import CORS
-import base64
 import logging
 
 # Configure logging for debugging
@@ -100,69 +99,34 @@ def student_details():
             logging.warning(f"Invalid roll number: {rollno}")
             return jsonify({"error": "Invalid roll number"}), 400
 
-        # Log the table name selected
-        logging.debug(f"Selected table: {table_name}")
-
-
-        query = f"""
-            SELECT rollno, Name, `Class/Section`, DOB, `Fathers Name`, `Mothers Name`,
-                `Father Email Address`, `Father Mobile Number`, `Mothers Email Address`,
-                `Mothers Phone Number`, `Student Email Address`, `Student Phone Number`,
-                `address`
+        # Fetch student details
+        student_query = f"""
+            SELECT rollno, Name, Class/Section, DOB, Fathers Name, Mothers Name,
+            Father Email Address, Father Mobile Number, Mothers Email Address,
+            Mothers Phone Number, Student Email Address, Student Phone Number, address
             FROM {table_name}
             WHERE rollno = %s
         """
-        query1 = '''
-            SELECT img FROM image WHERE id = %s
-        '''
-
-        # Log the final query to be executed
-        logging.debug(f"Executing query: {query} with rollno: {rollno}")
-
-        cursor.execute(query, (rollno,))
-        result = cursor.fetchone()
-
-        cursor.execute(query1, (rollno,))
-        result1 = cursor.fetchone()
-
-        logging.debug(f"Query result: {result}")  # Log the result before unpacking
-
-        if result:
-            try:
-                # Unpack the result to match the number of columns (13 values)
-                rollno, name, class_section, dob, father_name, mother_name, father_email, father_mobile, \
-                mother_email, mother_mobile, student_email, student_mobile, address = result
-
-                # Convert image data to Base64 if result1 exists
-                img_base64 = None
-                if result1 and result1[0]:
-                    img_base64 = base64.b64encode(result1[0]).decode('utf-8')  # Convert bytes to Base64 string
-                         # Prepare the response data
-                student_data = {
-                    "rollno": rollno,
-                    "name": name,
-                    "class_section": class_section,
-                    "dob": dob,
-                    "father_name": father_name,
-                    "mother_name": mother_name,
-                    "father_email": father_email,
-                    "father_mobile": father_mobile,
-                    "mother_email": mother_email,
-                    "mother_mobile": mother_mobile,
-                    "student_email": student_email,
-                    "student_mobile": student_mobile,
-                    "address": address,
-                    "imagePath": img_base64,  # Include the Base64 string for the image
-                }
-
-                logging.info("Student data fetched successfully.")
-                return student_data
-                
-                
-            except Exception as e:
-                logging.error(f"Error unpacking query result: {e}")
-                return {"error": "Error processing student details."}
-
+        cursor.execute(student_query, (rollno,))
+        student = cursor.fetchone()
+        
+        if student:
+            student_data = {
+                "rollno": student[0],
+                "name": student[1],
+                "class_section": student[2],
+                "dob": student[3],
+                "father_name": student[4],
+                "mother_name": student[5],
+                "father_email": student[6],
+                "father_mobile": student[7],
+                "mother_email": student[8],
+                "mother_mobile": student[9],
+                "student_email": student[10],
+                "student_mobile": student[11],
+                "address": student[12],
+            }
+            return jsonify(student_data)
         else:
             logging.warning(f"No student found with rollno: {rollno}")
             return {"error": "Student not found."}
@@ -173,6 +137,7 @@ def student_details():
     finally:
         cursor.close()
         conn.close()
+
 
 
 @app.route('/tlogin', methods=['POST'])

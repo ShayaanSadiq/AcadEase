@@ -5,11 +5,12 @@ import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
 import 'parent_login_page.dart';
 import 'studentdetailpt.dart';
-
+import 'package:provider/provider.dart';
+import 'UserProvider.dart';
 class ParentHomePage extends StatefulWidget {
-  final String loggedInRollNo;
+  final String username;  // Added username parameter
 
-  const ParentHomePage({super.key, required this.loggedInRollNo});
+  const ParentHomePage({super.key, required this.username});
 
   @override
   _ParentHomePageState createState() => _ParentHomePageState();
@@ -19,11 +20,11 @@ class _ParentHomePageState extends State<ParentHomePage> {
   final String apiUrl = 'http://127.0.0.1:5000/student_details';
   late Future<Map<String, dynamic>> _studentDetails;
 
-  Future<Map<String, dynamic>> fetchStudentDetails() async {
+  Future<Map<String, dynamic>> fetchStudentDetails(String rollNo) async {
     final response = await http.post(
       Uri.parse(apiUrl),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({'rollno': widget.loggedInRollNo}),
+      body: json.encode({'rollno': rollNo}),
     );
 
     if (response.statusCode == 200) {
@@ -36,11 +37,15 @@ class _ParentHomePageState extends State<ParentHomePage> {
   @override
   void initState() {
     super.initState();
-    _studentDetails = fetchStudentDetails();
+    // Get the logged-in roll number from UserProvider
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    _studentDetails = fetchStudentDetails(userProvider.username);
   }
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -90,7 +95,7 @@ class _ParentHomePageState extends State<ParentHomePage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => StudentDetailsPage(
-                      loggedInRollNo: widget.loggedInRollNo,
+                      loggedInRollNo: userProvider.username,
                     ),
                   ),
                 );
@@ -106,6 +111,11 @@ class _ParentHomePageState extends State<ParentHomePage> {
                   MaterialPageRoute(builder: (context) => AnnouncementsPage()),
                 );
               },
+            ),
+            ListTile(
+              leading: const Icon(Icons.assignment, color: Colors.deepPurple),
+              title: const Text('Marksheet'),
+              onTap: () {},
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
@@ -172,6 +182,9 @@ class _ParentHomePageState extends State<ParentHomePage> {
                           ),
                         );
                       }
+
+                      final imagePath = 'assets/stdimg/${student['rollno']}.png';
+
                       return Card(
                         elevation: 3,
                         margin: const EdgeInsets.all(10),
@@ -180,31 +193,25 @@ class _ParentHomePageState extends State<ParentHomePage> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              student['imagePath'] != null
-                                  ? Container(
-                                      width: 80,
-                                      height: 80,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade300,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Image.memory(
-                                        base64Decode(student['imagePath']),
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Icon(Icons.error, size: 40); // Fallback
-                                        },
-                                      ),
-                                    )
-                                  : Container(
-                                      width: 80,
-                                      height: 80,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade300,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: const Icon(Icons.person, size: 40),
-                                    ),
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade300,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Image.asset(
+                                    imagePath,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Icon(
+                                        Icons.error,
+                                        color: Colors.red,
+                                        size: 40,
+                                      );
+                                    },
+                                  ),
+                               ),
                               const SizedBox(width: 15),
                               Expanded(
                                 child: Column(

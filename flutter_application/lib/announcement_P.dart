@@ -4,6 +4,8 @@ import 'studentdetailpt.dart';
 import 'apply_leaveP.dart';
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:AcadEase/UserProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'parent_login_page.dart';
 import 'parent_home_page.dart';
 import 'announcement_P.dart';
@@ -86,14 +88,21 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
               leading: const Icon(Icons.home, color: Colors.deepPurple),
               title: const Text('Home'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ParentHomePage(loggedInRollNo: widget.loggedInRollNo),
-                  ),
-                );
-              },
+                  Navigator.pop(context); // Close the drawer
+
+                  // Get the username from UserProvider
+                  final username = Provider.of<UserProvider>(context, listen: false).username;
+
+
+                  // Navigate to ParentHomePage with the username
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ParentHomePage(username: username),
+                    ),
+                  );
+                },
+
             ),
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
@@ -167,6 +176,9 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                   ),
                 );
               }
+
+              final imagePath = 'assets/stdimg/${student['rollno']}.png';
+
               return SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.only(top: 63),
@@ -183,23 +195,24 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: Colors.deepPurple, width: 2),
                           ),
-                          child: (student['imagePath'] != null && student['imagePath'] is String)
-                              ? Image.memory(
-                                  base64Decode(student['imagePath']),
-                                  fit: BoxFit.cover,
-                                )
-                              : const Icon(
-                                  Icons.person,
-                                  size: 80,
-                                  color: Colors.deepPurple,
-                                ),
+                          child: Image.asset(
+                            imagePath,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.error,
+                                color: Colors.red,
+                                size: 40,
+                              );
+                            },
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
                       _buildDetailRow('Name', student['name']),
                       const SizedBox(height: 16),
                       _buildDetailRow('Roll No', student['rollno'].toString()),
-                      const SizedBox(height: 16), // Ensure it's converted to a String
+                      const SizedBox(height: 16), 
                       _buildDetailRow('Date of Birth', student['dob']),
                       const SizedBox(height: 16),
                       _buildDetailRow('Class/Section', student['class_section'].toString()),
@@ -234,15 +247,15 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
     );
   }
 
-    Widget _buildDetailRow(String label, String value) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
             color: Colors.deepPurple,
