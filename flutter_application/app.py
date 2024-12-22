@@ -5,8 +5,6 @@ from datetime import datetime
 from flask_cors import CORS
 import base64
 import logging
-import io
-from PIL import Image
 
 # Configure logging for debugging
 logging.basicConfig(level=logging.DEBUG)
@@ -20,8 +18,8 @@ def get_db_connection():
         conn = pymysql.connect(
             host="localhost",
             user="root",
-            password="root",
-            database="studentdb"
+            password="acadease27",
+            database="day_att"
         )
         logging.debug("Database connection established.")
         return conn
@@ -61,6 +59,9 @@ def login():
     except Exception as e:
         logging.error(f"Failed to process login: {e}")
         return jsonify({"error": f"Failed to process login: {e}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.route('/student_details', methods=['POST'])
 def student_details():
@@ -68,28 +69,35 @@ def student_details():
     rollno = data.get('rollno')
 
     if not rollno:
+        logging.warning("Roll number is missing in the request.")
         return jsonify({"error": "Roll number is required"}), 400
 
     try:
-        rollno = int(rollno)
+        # Try parsing the rollno to an integer and print the value
+        logging.debug(f"Roll number received: {rollno}")
+
+        try:
+            rollno = int(rollno)  # Convert rollno to integer if it's in string format
+            logging.debug(f"Converted roll number to integer: {rollno}")
+        except ValueError:
+            logging.warning("Invalid roll number format.")
+            return jsonify({"error": "Invalid roll number format"}), 400
+
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Determine table name based on roll number
-        table_mapping = {
-            (111001, 111030): 'elevena',
-            (112001, 112030): 'elevenb',
-            (121001, 121030): 'twelvea',
-            (122001, 122030): 'twelveb'
-        }
-
-        table_name = None
-        for (start, end), table in table_mapping.items():
-            if start <= rollno <= end:
-                table_name = table
-                break
-
-        if not table_name:
+        # Determine the table based on the roll number
+        table_name = ''
+        if 111001 <= rollno <= 111030:
+            table_name = 'elevena'
+        elif 112001 <= rollno <= 112030:
+            table_name = 'elevenb'
+        elif 121001 <= rollno <= 121030:
+            table_name = 'twelvea'
+        elif 122001 <= rollno <= 122030:
+            table_name = 'twelveb'
+        else:
+            logging.warning(f"Invalid roll number: {rollno}")
             return jsonify({"error": "Invalid roll number"}), 400
 
         # Fetch student details
@@ -102,23 +110,7 @@ def student_details():
         """
         cursor.execute(student_query, (rollno,))
         student = cursor.fetchone()
-        '''
-        # Fetch image path (assume image URLs stored in DB)
-        query = "SELECT img FROM image WHERE id = %s"
-        cursor.execute(query, (rollno,))
-        result = cursor.fetchone()
         
-        # Convert image bytes to PIL image
-        image = Image.open(io.BytesIO(result[0]))
-            
-        # Resize and compress image
-        image.thumbnail((200, 200))  # Resize image to 200x200
-        img_byte_arr = io.BytesIO()
-        image.save(img_byte_arr, format='JPEG', quality=50)  # Compress with 50% quality
-            
-        # Encode to Base64
-        img_base64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
-        '''
         if student:
             student_data = {
                 "rollno": student[0],
@@ -137,12 +129,12 @@ def student_details():
             }
             return jsonify(student_data)
         else:
-            return jsonify({"error": "Student not found"}), 404
+            logging.warning(f"No student found with rollno: {rollno}")
+            return {"error": "Student not found."}
 
     except Exception as e:
-        logging.error(f"Error fetching student details: {e}")
-        return jsonify({"error": "Failed to fetch student details"}), 500
-
+        logging.error(f"Failed to fetch student details: {str(e)}")
+        return jsonify({"error": "Failed to fetch student details."}), 500
     finally:
         cursor.close()
         conn.close()

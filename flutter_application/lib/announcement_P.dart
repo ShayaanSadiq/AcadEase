@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
+import 'parent_home_page.dart';
+import 'studentdetailpt.dart';
+import 'apply_leaveP.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -10,19 +9,19 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Color(0xFF9C27B0), // Purple color for primary theme
-        scaffoldBackgroundColor: Color(0xFFF3E5F5), // Light purple background
-        appBarTheme: AppBarTheme(
+        primaryColor: const Color(0xFF9C27B0), // Purple color for primary theme
+        scaffoldBackgroundColor: const Color(0xFFF3E5F5), // Light purple background
+        appBarTheme: const AppBarTheme(
           color: Color(0xFF9C27B0), // Purple color for AppBar
         ),
-        drawerTheme: DrawerThemeData(
+        drawerTheme: const DrawerThemeData(
           backgroundColor: Color(0xFFF3E5F5), // Light purple for drawer background
         ),
-        buttonTheme: ButtonThemeData(
+        buttonTheme: const ButtonThemeData(
           buttonColor: Color(0xFF9C27B0), // Purple color for buttons
           textTheme: ButtonTextTheme.primary,
         ),
-        textTheme: TextTheme(
+        textTheme: const TextTheme(
           bodyLarge: TextStyle(color: Colors.deepPurple),
           bodyMedium: TextStyle(color: Colors.deepPurple),
           titleLarge: TextStyle(color: Colors.white),
@@ -38,11 +37,11 @@ class AnnouncementsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('AcadEase'),
+        title: const Text('Anouncement'),
         backgroundColor: Theme.of(context).primaryColor,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
+            icon: const Icon(Icons.menu),
             onPressed: () {
               Scaffold.of(context).openDrawer();
             },
@@ -61,7 +60,7 @@ class AnnouncementsPage extends StatelessWidget {
                   end: Alignment.bottomLeft,
                 ),
               ),
-              child: Text(
+              child: const Text(
                 'Menu',
                 style: TextStyle(
                   color: Colors.white,
@@ -105,8 +104,8 @@ class AnnouncementsPage extends StatelessWidget {
               onTap: () {},
             ),
             ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Logout'),
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
               onTap: () {
                 // Handle Logout tap
               },
@@ -128,7 +127,7 @@ class AnnouncementsPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Theme.of(context).primaryColor, Colors.purple.shade200],
@@ -137,7 +136,7 @@ class AnnouncementsPage extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                child: Text(
+                child: const Text(
                   'Announcements',
                   style: TextStyle(
                     fontSize: 24,
@@ -146,9 +145,9 @@ class AnnouncementsPage extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Container(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border.all(color: Colors.grey),
@@ -156,11 +155,11 @@ class AnnouncementsPage extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.class_,
                       color: Colors.blueAccent,
                     ),
-                    SizedBox(width: 8.0),
+                    const SizedBox(width: 8.0),
                     Text(
                       'Exam Schedule',
                       style: TextStyle(
@@ -171,9 +170,9 @@ class AnnouncementsPage extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Container(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border.all(color: Colors.grey),
@@ -181,11 +180,11 @@ class AnnouncementsPage extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.school,
                       color: Colors.blueAccent,
                     ),
-                    SizedBox(width: 8.0),
+                    const SizedBox(width: 8.0),
                     Text(
                       'PTM Circular',
                       style: TextStyle(

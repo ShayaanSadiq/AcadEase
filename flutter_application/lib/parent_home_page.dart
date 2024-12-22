@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:AcadEase/announcement_P.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
@@ -98,7 +99,13 @@ class _ParentHomePageState extends State<ParentHomePage> {
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
               title: const Text('Announcements'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AnnouncementsPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
@@ -119,7 +126,8 @@ class _ParentHomePageState extends State<ParentHomePage> {
               leading: const Icon(Icons.logout, color: Colors.deepPurple),
               title: const Text('Logout'),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(context); // Close the drawer
+                // Navigate to the login screen when the user logs out
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const ParentLoginPage()),
@@ -177,25 +185,28 @@ class _ParentHomePageState extends State<ParentHomePage> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade300,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Image.asset(
-                                  imagePath,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(
-                                      Icons.error,
-                                      color: Colors.red,
-                                      size: 40,
-                                    );
-                                  },
-                                ),
-                              ),
+                              student['imagePath'] != null
+                                  ? Container(
+                                      width: 80,
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade300,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Image.memory(
+                                        base64Decode(student['imagePath']),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                  : Container(
+                                      width: 80,
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade300,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Icon(Icons.person, size: 40),
+                                    ),
                               const SizedBox(width: 15),
                               Expanded(
                                 child: Column(
@@ -271,11 +282,3 @@ class _ParentHomePageState extends State<ParentHomePage> {
     );
   }
 }
-
-extension IntToString on int {
-  String toStringExtension() {
-    return this.toString();  // Converts int to String
-  }
-}
-
-
