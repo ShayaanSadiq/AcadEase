@@ -136,7 +136,7 @@ class _ParentHomePageState extends State<ParentHomePage> {
               leading: const Icon(Icons.logout, color: Colors.deepPurple),
               title: const Text('Logout'),
               onTap: () {
-                Navigator.pop(context); 
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const ParentLoginPage()),
@@ -193,25 +193,25 @@ class _ParentHomePageState extends State<ParentHomePage> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                                Container(
-                                  width: 80,
-                                  height: 80,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade300,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Image.asset(
-                                    imagePath,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(
-                                        Icons.error,
-                                        color: Colors.red,
-                                        size: 40,
-                                      );
-                                    },
-                                  ),
-                               ),
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade300,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Image.asset(
+                                  imagePath,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(
+                                      Icons.error,
+                                      color: Colors.red,
+                                      size: 40,
+                                    );
+                                  },
+                                ),
+                              ),
                               const SizedBox(width: 15),
                               Expanded(
                                 child: Column(

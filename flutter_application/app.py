@@ -101,9 +101,9 @@ def student_details():
 
         # Fetch student details
         student_query = f"""
-            SELECT rollno, Name, Class/Section, DOB, Fathers Name, Mothers Name,
-            Father Email Address, Father Mobile Number, Mothers Email Address,
-            Mothers Phone Number, Student Email Address, Student Phone Number, address
+            SELECT `rollno`, `Name`, `Class/Section`, `DOB`, `Fathers Name`, `Mothers Name`,
+            `Father Email Address`, `Father Mobile Number`, `Mothers Email Address`,
+            `Mothers Phone Number`, `Student Email Address`, `Student Phone Number`, `address`
             FROM {table_name}
             WHERE rollno = %s
         """
@@ -281,3 +281,4 @@ def mark_absent():
 
 if __name__ == '__main__':
     app.run(debug=True)
+

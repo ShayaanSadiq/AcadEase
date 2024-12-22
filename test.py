@@ -535,7 +535,7 @@ ALTER TABLE `studentdb`.`month_att` CHANGE COLUMN `2025-01-31` `2025-01-31` INT 
 
 
 
-import random
+
 '''list1=[20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,60]
 for i in range(1,121):
     print(random.choice(list1))
@@ -569,6 +569,8 @@ for i in range(1,121):
       'address':'LB Nagar'
 '''
 
+'''
+
 import pymysql
 import io
 from PIL import Image
@@ -588,3 +590,66 @@ img1=Image.open(file_like2)
 img1.show()
 cursor.close()
 connection.close()
+
+'''
+
+
+import base64
+import io
+import logging
+import random
+import mysql.connector as mysql
+from PIL import Image
+
+from flask import jsonify, request
+
+rollno = int(input("Enter rollno: "))
+conn = mysql.connect(host="localhost",
+                     user="root",
+                     password="root",
+                     database="studentdb")
+cursor = conn.cursor()
+
+# Fetch student details
+student_query = """
+    SELECT `rollno`, `Name`, `Class/Section`, `DOB`, `Fathers Name`, `Mothers Name`,
+        `Father Email Address`, `Father Mobile Number`, `Mothers Email Address`,
+        `Mothers Phone Number`, `Student Email Address`, `Student Phone Number`, `address`
+    FROM elevena
+    WHERE rollno = %s
+"""
+cursor.execute(student_query, (rollno,))
+student = cursor.fetchone()
+# Fetch image path (assume image URLs stored in DB)
+query = "SELECT img FROM image WHERE id = %s"
+cursor.execute(query, (rollno,))
+result = cursor.fetchone()
+
+# Convert image bytes to PIL image
+image = Image.open(io.BytesIO(result[0]))
+    
+# Resize and compress image
+image.thumbnail((200, 200))  # Resize image to 200x200
+img_byte_arr = io.BytesIO()
+image.save(img_byte_arr, format='JPEG', quality=50)  # Compress with 50% quality
+    
+# Encode to Base64
+img_base64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
+if student:
+    student_data = {
+        "rollno": student[0],
+        "name": student[1],
+        "class_section": student[2],
+        "dob": student[3],
+        "father_name": student[4],
+        "mother_name": student[5],
+        "father_email": student[6],
+        "father_mobile": student[7],
+        "mother_email": student[8],
+        "mother_mobile": student[9],
+        "student_email": student[10],
+        "student_mobile": student[11],
+        "address": student[12],
+        "image_url": img_base64
+}
+print(student_data)
