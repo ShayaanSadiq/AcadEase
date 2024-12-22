@@ -18,7 +18,7 @@ class StudentDetailsPage extends StatefulWidget {
 }
 
 class _StudentDetailsPageState extends State<StudentDetailsPage> {
-  final String apiUrl = 'http://10.0.2.2:5000/student_details'; // Replace with your host machine's IP
+  final String apiUrl = 'http://127.0.0.1:5000/student_details'; // Replace with your host machine's IP
   late Future<Map<String, dynamic>> _studentDetails;
 
   Future<Map<String, dynamic>> fetchStudentDetails() async {

@@ -6,7 +6,6 @@ import 'package:table_calendar/table_calendar.dart';
 import 'parent_login_page.dart';
 import 'studentdetailpt.dart';
 
-
 class ParentHomePage extends StatefulWidget {
   final String loggedInRollNo;
 
@@ -17,7 +16,7 @@ class ParentHomePage extends StatefulWidget {
 }
 
 class _ParentHomePageState extends State<ParentHomePage> {
-  final String apiUrl = 'http://10.0.2.2:5000/student_details';
+  final String apiUrl = 'http://127.0.0.1:5000/student_details';
   late Future<Map<String, dynamic>> _studentDetails;
 
   Future<Map<String, dynamic>> fetchStudentDetails() async {
@@ -90,21 +89,18 @@ class _ParentHomePageState extends State<ParentHomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => StudentDetailsPage( // Pass the rollNo parameter
-                      loggedInRollNo: widget.loggedInRollNo, // Pass the loggedInRollNo parameter
+                    builder: (context) => StudentDetailsPage(
+                      loggedInRollNo: widget.loggedInRollNo,
                     ),
                   ),
                 );
               },
-
-
             ),
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
               title: const Text('Announcements'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
-                // Navigate to the login screen when the user logs out
+                Navigator.pop(context); 
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => AnnouncementsPage()),
@@ -130,8 +126,7 @@ class _ParentHomePageState extends State<ParentHomePage> {
               leading: const Icon(Icons.logout, color: Colors.deepPurple),
               title: const Text('Logout'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
-                // Navigate to the login screen when the user logs out
+                Navigator.pop(context); 
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const ParentLoginPage()),
@@ -154,19 +149,19 @@ class _ParentHomePageState extends State<ParentHomePage> {
             children: [
               const SizedBox(height: 10),
               Padding(
-                padding: const EdgeInsets.only(top: 40), // Adjust the top padding value here
+                padding: const EdgeInsets.only(top: 40),
                 child: FutureBuilder<Map<String, dynamic>>(
                   future: _studentDetails,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
-                        return Center(
-                          child: Text(
-                            'Error: ${snapshot.error}',
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        );
+                      return Center(
+                        child: Text(
+                          'Error: ${snapshot.error}',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      );
                     } else if (snapshot.hasData) {
                       final student = snapshot.data!;
                       if (student.containsKey('error')) {
@@ -196,6 +191,9 @@ class _ParentHomePageState extends State<ParentHomePage> {
                                       child: Image.memory(
                                         base64Decode(student['imagePath']),
                                         fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Icon(Icons.error, size: 40); // Fallback
+                                        },
                                       ),
                                     )
                                   : Container(
@@ -282,11 +280,3 @@ class _ParentHomePageState extends State<ParentHomePage> {
     );
   }
 }
-
-extension IntToString on int {
-  String toStringExtension() {
-    return this.toString();  // Converts int to String
-  }
-}
-
-

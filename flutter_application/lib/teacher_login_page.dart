@@ -24,7 +24,7 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
 
     try {
       // Replace with your Flask API endpoint
-      final url = Uri.parse('http://10.0.2.2:5000/tlogin');
+      final url = Uri.parse('http://127.0.0.1:5000/tlogin');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},

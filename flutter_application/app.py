@@ -5,8 +5,6 @@ from datetime import datetime
 from flask_cors import CORS
 import base64
 import logging
-import io
-from PIL import Image
 
 # Configure logging for debugging
 logging.basicConfig(level=logging.DEBUG)
@@ -20,8 +18,8 @@ def get_db_connection():
         conn = pymysql.connect(
             host="localhost",
             user="root",
-            password="root",
-            database="studentdb"
+            password="acadease27",
+            database="day_att"
         )
         logging.debug("Database connection established.")
         return conn
@@ -61,6 +59,9 @@ def login():
     except Exception as e:
         logging.error(f"Failed to process login: {e}")
         return jsonify({"error": f"Failed to process login: {e}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.route('/student_details', methods=['POST'])
 def student_details():
@@ -68,71 +69,107 @@ def student_details():
     rollno = data.get('rollno')
 
     if not rollno:
+        logging.warning("Roll number is missing in the request.")
         return jsonify({"error": "Roll number is required"}), 400
 
     try:
-        rollno = int(rollno)
+        # Try parsing the rollno to an integer and print the value
+        logging.debug(f"Roll number received: {rollno}")
+
+        try:
+            rollno = int(rollno)  # Convert rollno to integer if it's in string format
+            logging.debug(f"Converted roll number to integer: {rollno}")
+        except ValueError:
+            logging.warning("Invalid roll number format.")
+            return jsonify({"error": "Invalid roll number format"}), 400
+
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Determine table name based on roll number
-        table_mapping = {
-            (111001, 111030): 'elevena',
-            (112001, 112030): 'elevenb',
-            (121001, 121030): 'twelvea',
-            (122001, 122030): 'twelveb'
-        }
-
-        table_name = None
-        for (start, end), table in table_mapping.items():
-            if start <= rollno <= end:
-                table_name = table
-                break
-
-        if not table_name:
+        # Determine the table based on the roll number
+        table_name = ''
+        if 111001 <= rollno <= 111030:
+            table_name = 'elevena'
+        elif 112001 <= rollno <= 112030:
+            table_name = 'elevenb'
+        elif 121001 <= rollno <= 121030:
+            table_name = 'twelvea'
+        elif 122001 <= rollno <= 122030:
+            table_name = 'twelveb'
+        else:
+            logging.warning(f"Invalid roll number: {rollno}")
             return jsonify({"error": "Invalid roll number"}), 400
 
-        # Fetch student details
-        student_query = f"""
-            SELECT `rollno`, `Name`, `Class/Section`, `DOB`, `Fathers Name`, `Mothers Name`,
+        # Log the table name selected
+        logging.debug(f"Selected table: {table_name}")
+
+
+        query = f"""
+            SELECT rollno, Name, `Class/Section`, DOB, `Fathers Name`, `Mothers Name`,
                 `Father Email Address`, `Father Mobile Number`, `Mothers Email Address`,
-                `Mothers Phone Number`, `Student Email Address`, `Student Phone Number`, `address`
+                `Mothers Phone Number`, `Student Email Address`, `Student Phone Number`,
+                `address`
             FROM {table_name}
             WHERE rollno = %s
         """
-        cursor.execute(student_query, (rollno,))
-        student = cursor.fetchone()
+        query1 = '''
+            SELECT img FROM image WHERE id = %s
+        '''
 
-        # Fetch image path (assume image URLs stored in DB)
-        image_query = "SELECT img FROM image WHERE id = %s"
-        cursor.execute(image_query, (rollno,))
-        image = cursor.fetchone()
+        # Log the final query to be executed
+        logging.debug(f"Executing query: {query} with rollno: {rollno}")
 
-        if student:
-            student_data = {
-                "rollno": student[0],
-                "name": student[1],
-                "class_section": student[2],
-                "dob": student[3],
-                "father_name": student[4],
-                "mother_name": student[5],
-                "father_email": student[6],
-                "father_mobile": student[7],
-                "mother_email": student[8],
-                "mother_mobile": student[9],
-                "student_email": student[10],
-                "student_mobile": student[11],
-                "address": student[12],
-                "image_url": image[0] if image else None
-            }
-            return jsonify(student_data), 200
+        cursor.execute(query, (rollno,))
+        result = cursor.fetchone()
+
+        cursor.execute(query1, (rollno,))
+        result1 = cursor.fetchone()
+
+        logging.debug(f"Query result: {result}")  # Log the result before unpacking
+
+        if result:
+            try:
+                # Unpack the result to match the number of columns (13 values)
+                rollno, name, class_section, dob, father_name, mother_name, father_email, father_mobile, \
+                mother_email, mother_mobile, student_email, student_mobile, address = result
+
+                # Convert image data to Base64 if result1 exists
+                img_base64 = None
+                if result1 and result1[0]:
+                    img_base64 = base64.b64encode(result1[0]).decode('utf-8')  # Convert bytes to Base64 string
+                         # Prepare the response data
+                student_data = {
+                    "rollno": rollno,
+                    "name": name,
+                    "class_section": class_section,
+                    "dob": dob,
+                    "father_name": father_name,
+                    "mother_name": mother_name,
+                    "father_email": father_email,
+                    "father_mobile": father_mobile,
+                    "mother_email": mother_email,
+                    "mother_mobile": mother_mobile,
+                    "student_email": student_email,
+                    "student_mobile": student_mobile,
+                    "address": address,
+                    "imagePath": img_base64,  # Include the Base64 string for the image
+                }
+
+                logging.info("Student data fetched successfully.")
+                return student_data
+                
+                
+            except Exception as e:
+                logging.error(f"Error unpacking query result: {e}")
+                return {"error": "Error processing student details."}
+
         else:
-            return jsonify({"error": "Student not found"}), 404
+            logging.warning(f"No student found with rollno: {rollno}")
+            return {"error": "Student not found."}
 
     except Exception as e:
-        logging.error(f"Error fetching student details: {e}")
-        return jsonify({"error": "Failed to fetch student details"}), 500
-
+        logging.error(f"Failed to fetch student details: {str(e)}")
+        return jsonify({"error": "Failed to fetch student details."}), 500
     finally:
         cursor.close()
         conn.close()

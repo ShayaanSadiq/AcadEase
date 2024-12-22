@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart';
-
-import 'flutter/packages/flutter/lib/cupertino.dart';
-import 'flutter/packages/flutter/lib/material.dart';
-import 'flutter/packages/flutter/lib/painting.dart';
-import 'flutter/packages/flutter/lib/rendering.dart';
-
 void main() {
   runApp(TeacherConcernApp());
 }
