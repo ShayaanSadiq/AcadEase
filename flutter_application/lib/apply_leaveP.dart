@@ -20,6 +20,7 @@ class ApplyForLeavePage extends StatefulWidget {
 class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
   String? _selectedDuration;
   bool _showCustomDuration = false;
+  bool _isLoading = false;
 
   final TextEditingController _startDateController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
@@ -64,6 +65,10 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
       if (_showCustomDuration) 'start_date': startDate,
       if (_showCustomDuration) 'end_date': endDate,
     };
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final response = await http.post(
@@ -123,6 +128,10 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
           ],
         ),
       );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -134,7 +143,7 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
         elevation: 0,
         backgroundColor: Colors.transparent,
         title: const Text(
-          'Parent Home',
+          'Apply for Leave',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -166,10 +175,10 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
                 ),
               ),
             ),
-           ListTile(
+            ListTile(
               leading: const Icon(Icons.home, color: Colors.deepPurple),
               title: const Text('Home'),
-               onTap: () {
+              onTap: () {
                     Navigator.pop(context); // Close the drawer
                     final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
                     Navigator.push(
@@ -185,19 +194,17 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
-             onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => StudentDetailsPage(
-                          loggedInRollNo: userProvider.username, // Pass the roll number from UserProvider
-                        ),
-                      ),
-                    );
-                  },
-
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StudentDetailsPage(
+                      loggedInRollNo: UserProvider().username,
+                    ),
+                  ),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
@@ -225,7 +232,11 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
               leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
               title: const Text('Apply for Leave'),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ApplyForLeavePage()),
+                );
               },
             ),
             ListTile(
@@ -311,8 +322,7 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
                           controller: _startDateController,
                           decoration: InputDecoration(
                             labelText: 'Start Date (YYYY-MM-DD)',
-                            labelStyle:
-                                const TextStyle(color: Colors.deepPurple),
+                            labelStyle: const TextStyle(color: Colors.deepPurple),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -326,8 +336,7 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
                           controller: _endDateController,
                           decoration: InputDecoration(
                             labelText: 'End Date (YYYY-MM-DD)',
-                            labelStyle:
-                                const TextStyle(color: Colors.deepPurple),
+                            labelStyle: const TextStyle(color: Colors.deepPurple),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -344,8 +353,7 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
                         decoration: InputDecoration(
                           labelText: 'Reason',
                           alignLabelWithHint: true,
-                          labelStyle:
-                              const TextStyle(color: Color.fromARGB(255, 251, 250, 252)),
+                          labelStyle: const TextStyle(color: Colors.deepPurple),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -355,16 +363,26 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: submitLeaveRequest,
+                        onPressed: _isLoading ? null : submitLeaveRequest,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.deepPurple,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          textStyle: const TextStyle(fontSize: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
                         ),
-                        child: const Text('Submit Leave Request'),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                'Submit',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ],
                   ),

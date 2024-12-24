@@ -9,6 +9,7 @@ import 'parent_home_page.dart';
 import 'marksheet_page.dart';
 import 'studentdetailpt.dart';
 import 'parent_login_page.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -58,19 +59,16 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      if (data is List && data.isEmpty) {
-        setState(() {
-          announcements = [];
+      setState(() {
+          announcements = data.map((announcement) {
+            return {
+              'subject': announcement['subject'],
+              'description': announcement['desc'], // Map 'desc' to 'description'
+              'date': announcement['date'],
+            };
+          }).toList();
         });
-      } else if (data is Map && data.containsKey('message')) {
-        setState(() {
-          announcements = [];
-        });
-      } else {
-        setState(() {
-          announcements = data;
-        });
-      }
+
     } else {
       throw Exception('Failed to load announcements');
     }
@@ -86,7 +84,17 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Announcements'),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: const Text(
+          'Parent Home',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
       ),
       drawer: Drawer(
         child: ListView(
@@ -100,59 +108,57 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
                   end: Alignment.bottomLeft,
                 ),
               ),
-              child: const Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
+              child: const Center(
+                child: Text(
+                  'Menu',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
             ListTile(
               leading: const Icon(Icons.home, color: Colors.deepPurple),
               title: const Text('Home'),
-               onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ParentHomePage(
-                          username: userProvider.username, // Pass the roll number from UserProvider
-                        ),
-                      ),
-                    );
-                  },
+              onTap: () {
+                Navigator.pop(context);
+                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ParentHomePage(username: userProvider.username),
+                  ),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
-             onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => StudentDetailsPage(
-                          loggedInRollNo: userProvider.username, // Pass the roll number from UserProvider
-                        ),
-                      ),
-                    );
-                  },
-
+              onTap: () {
+                Navigator.pop(context);
+                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StudentDetailsPage(loggedInRollNo: userProvider.username),
+                  ),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
               title: const Text('Announcements'),
               onTap: () {
-                Navigator.pop(context); 
+                Navigator.pop(context);
               },
             ),
             ListTile(
               leading: const Icon(Icons.assignment, color: Colors.deepPurple),
               title: const Text('Marksheet'),
               onTap: () {
-                Navigator.pop(context); 
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => MarksPage()),
@@ -163,7 +169,7 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
               leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
               title: const Text('Apply for Leave'),
               onTap: () {
-                Navigator.pop(context); 
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => ApplyForLeavePage()),
@@ -174,7 +180,7 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
               leading: const Icon(Icons.announcement, color: Colors.deepPurple),
               title: const Text('Concerns'),
               onTap: () {
-                Navigator.pop(context); 
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => ConcernsPage()),
@@ -200,52 +206,72 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
           ],
         ),
       ),
-      body: announcements.isEmpty
-          ? const Center(child: Text('No Announcements Available'))
-          : ListView.builder(
-              itemCount: announcements.length,
-              itemBuilder: (context, index) {
-                final announcement = announcements[index];
-                return Card(
-                  margin: const EdgeInsets.all(8.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white, Color(0xFFF3E5F5)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: announcements.isEmpty
+            ? const Center(
+                child: Text(
+                  'No Announcements Available',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              )
+            : ListView.builder(
+                  itemCount: announcements.length,
+                  itemBuilder: (context, index) {
+                    final announcement = announcements[index];
+                    return Card(
+                      margin: const EdgeInsets.all(10.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      elevation: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              announcement['subject'],
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  announcement['subject'] ?? 'No Subject', // Default fallback
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.deepPurple,
+                                  ),
+                                ),
+                                Text(
+                                  announcement['date'] ?? 'No Date', // Default fallback
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
                             ),
+                            const SizedBox(height: 8),
                             Text(
-                              announcement['date'],
+                              announcement['description'] ?? 'No Description', // Default fallback
                               style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
+                                fontSize: 16,
+                                color: Colors.black87,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          announcement['description'],
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                      ),
+                    );
+                  },
+                ),
+
+      ),
     );
   }
 }

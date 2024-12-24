@@ -283,17 +283,32 @@ def mark_absent():
 @app.route('/announcements', methods=['GET'])
 def get_announcements():
     try:
+        # Establish database connection
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT subject, desc, date FROM announcements ORDER BY date DESC")
-        announcements = cursor.fetchall()
-        conn.close()
-        if not announcements:
-            return jsonify({"message": "No announcements available"})
-        return jsonify(announcements)
-    except Exception as e:
-        return jsonify({"error": str(e)})
+        cursor = conn.cursor(pymysql.cursors.DictCursor)  # Use DictCursor to get results as dictionaries
 
+        # Fetch announcements ordered by date in descending order
+        query = "SELECT subject, `desc`, `date` FROM announcements ORDER BY date DESC"
+        cursor.execute(query)
+        announcements = cursor.fetchall()
+
+        # Close database connection
+        cursor.close()
+        conn.close()
+
+        # Check if announcements exist
+        if not announcements:
+            return jsonify({"message": "No announcements available"}), 404
+
+        # Return announcements
+        return jsonify(announcements), 200
+
+    except pymysql.MySQLError as e:
+        logging.error(f"MySQL Error: {str(e)}")
+        return jsonify({"error": "Database error occurred"}), 500
+    except Exception as e:
+        logging.error(f"Error: {str(e)}")
+        return jsonify({"error": "An error occurred"}), 500
 
 # Set up logging for debugging
 logging.basicConfig(level=logging.DEBUG)
