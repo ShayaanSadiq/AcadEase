@@ -1,12 +1,16 @@
 import 'dart:convert';
-import 'package:AcadEase/announcement_P.dart';
+import 'announcement_P.dart';
+import 'apply_leaveP.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
 import 'parent_login_page.dart';
 import 'studentdetailpt.dart';
 import 'package:provider/provider.dart';
-import 'UserProvider.dart';
+import 'marksheet_page.dart';
+import 'UserProvider.dart'; // Keep this as the main UserProvider import
+import 'concerns.dart';
+
 class ParentHomePage extends StatefulWidget {
   final String username;  // Added username parameter
 
@@ -16,31 +20,35 @@ class ParentHomePage extends StatefulWidget {
   _ParentHomePageState createState() => _ParentHomePageState();
 }
 
-class _ParentHomePageState extends State<ParentHomePage> {
-  final String apiUrl = 'http://127.0.0.1:5000/student_details';
-  late Future<Map<String, dynamic>> _studentDetails;
+      class _ParentHomePageState extends State<ParentHomePage> {
+        final String apiUrl = 'http://127.0.0.1:5000/student_details';
+        late Future<Map<String, dynamic>> _studentDetails = Future.value({});
 
-  Future<Map<String, dynamic>> fetchStudentDetails(String rollNo) async {
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'rollno': rollNo}),
-    );
+        Future<Map<String, dynamic>> fetchStudentDetails(String rollNo) async {
+          final response = await http.post(
+            Uri.parse(apiUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({'rollno': rollNo}),
+          );
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load student details');
-    }
-  }
+          if (response.statusCode == 200) {
+            return json.decode(response.body);
+          } else {
+            throw Exception('Failed to load student details');
+          }
+        }
 
-  @override
-  void initState() {
-    super.initState();
-    // Get the logged-in roll number from UserProvider
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    _studentDetails = fetchStudentDetails(userProvider.username);
-  }
+        @override
+        void initState() {
+          super.initState();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final userProvider = Provider.of<UserProvider>(context, listen: false);
+            setState(() {
+              _studentDetails = fetchStudentDetails(userProvider.username);
+            });
+          });
+        }
+
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +92,9 @@ class _ParentHomePageState extends State<ParentHomePage> {
             ListTile(
               leading: const Icon(Icons.home, color: Colors.deepPurple),
               title: const Text('Home'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+              },
             ),
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
@@ -115,17 +125,35 @@ class _ParentHomePageState extends State<ParentHomePage> {
             ListTile(
               leading: const Icon(Icons.assignment, color: Colors.deepPurple),
               title: const Text('Marksheet'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MarksPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
               title: const Text('Apply for Leave'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ApplyForLeavePage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.announcement, color: Colors.deepPurple),
               title: const Text('Concerns'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ConcernsPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),

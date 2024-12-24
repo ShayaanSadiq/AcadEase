@@ -1,78 +1,144 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'parent_login_page.dart';
 import 'studentdetailpt.dart';
 import 'announcement_P.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: ApplyForLeavePage(),
-    );
-  }
-}
+import 'package:provider/provider.dart';
+import 'UserProvider.dart';
 
 class ApplyForLeavePage extends StatefulWidget {
+  const ApplyForLeavePage({super.key});
+
   @override
   _ApplyForLeavePageState createState() => _ApplyForLeavePageState();
 }
 
 class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
   String? _selectedDuration;
-  String? _selectedCustomDuration;
-  DateTimeRange? _selectedDateRange;
   bool _showCustomDuration = false;
 
-  void _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(DateTime.now().year + 1),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Colors.deepPurple,
-              onPrimary: Colors.white,
-              onSurface: Colors.deepPurple,
+  final TextEditingController _startDateController = TextEditingController();
+  final TextEditingController _endDateController = TextEditingController();
+  final TextEditingController _reasonController = TextEditingController();
+
+  Future<void> submitLeaveRequest() async {
+    String? userRollNumber =
+        Provider.of<UserProvider>(context, listen: false).username;
+
+    String duration = _selectedDuration ?? "Not Selected";
+    String startDate = _startDateController.text;
+    String endDate = _endDateController.text;
+    String reason = _reasonController.text;
+
+    if (_selectedDuration == null ||
+        reason.isEmpty ||
+        (_showCustomDuration && (startDate.isEmpty || endDate.isEmpty))) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: const Text('Please fill in all required fields.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
             ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final url = Uri.parse('http://127.0.0.1:5000/add_leave');
+
+    final Map<String, dynamic> data = {
+      'rollno': userRollNumber,
+      'desc': reason,
+      'duration': duration,
+      if (_showCustomDuration) 'start_date': startDate,
+      if (_showCustomDuration) 'end_date': endDate,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(data),
+      );
+
+      if (response.statusCode == 201) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Success'),
+            content: const Text('Leave request submitted successfully!'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('OK'),
+              ),
+            ],
           ),
-          child: child!,
         );
-      },
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedDateRange = picked;
-      });
+      } else {
+        final responseMessage = json.decode(response.body)['message'] ?? '';
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text(
+                'Failed to submit leave request. $responseMessage Please try again.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: Text('An error occurred: $e'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            'AcadEase',
-            style: TextStyle(fontSize: 22),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: const Text(
+          'Parent Home',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.deepPurple,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
-        ),
+        centerTitle: true,
       ),
       drawer: Drawer(
         child: ListView(
@@ -81,7 +147,10 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
             DrawerHeader(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.deepPurple.shade300, Colors.deepPurple.shade700],
+                  colors: [
+                    Colors.deepPurple.shade300,
+                    Colors.deepPurple.shade700
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -102,12 +171,36 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => StudentDetailsPage(loggedInRollNo: '',)),
-                );
-              },
+             onTap: () {
+                    final userRollNumber = Provider.of<UserProvider>(context, listen: false).username;
+
+                    if (userRollNumber.isEmpty) {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Error'),
+                          content: const Text('User roll number is missing. Please log in again.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        ),
+                      );
+                      return;
+                    }
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StudentDetailsPage(loggedInRollNo: userRollNumber),
+                      ),
+                    );
+                  },
+
             ),
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
@@ -120,32 +213,13 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.assignment, color: Colors.deepPurple),
-              title: const Text('Marksheet'),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
-              title: const Text('Apply for Leave'),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.announcement, color: Colors.deepPurple),
-              title: const Text('Concerns'),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
-              title: const Text('Contact Us'),
-              onTap: () {},
-            ),
-            ListTile(
               leading: const Icon(Icons.logout, color: Colors.deepPurple),
               title: const Text('Logout'),
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const ParentLoginPage()),
+                  MaterialPageRoute(
+                      builder: (context) => const ParentLoginPage()),
                 );
               },
             ),
@@ -160,125 +234,111 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: 'Duration',
-                  labelStyle: const TextStyle(color: Colors.deepPurple),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.deepPurple),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.deepPurple.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
-                  ),
-                  filled: true,
-                  fillColor: Colors.deepPurple.shade50,
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Card(
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                value: _selectedDuration,
-                hint: const Text("Select an option"),
-                items: ['Full Day', 'Half Day', 'Custom']
-                    .map((duration) => DropdownMenuItem(
-                          value: duration,
-                          child: Text(duration),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedDuration = value;
-                    _showCustomDuration = value == 'Custom';
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              if (_showCustomDuration)
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    labelText: 'Custom Duration',
-                    labelStyle: const TextStyle(color: Colors.deepPurple),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.deepPurple.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
-                    ),
-                    filled: true,
-                    fillColor: Colors.deepPurple.shade50,
-                  ),
-                  value: _selectedCustomDuration,
-                  hint: const Text("Select Custom Duration"),
-                  items: ['Pick Dates']
-                      .map((duration) => DropdownMenuItem(
-                            value: duration,
-                            child: Text(duration),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value == 'Pick Dates') {
-                      _selectDateRange(context);
-                    }
-                  },
-                ),
-              const SizedBox(height: 16),
-              if (_selectedDateRange != null)
-                Text(
-                  'Selected Duration: ${_selectedDateRange!.start.toLocal()} - ${_selectedDateRange!.end.toLocal()}',
-                  style: const TextStyle(color: Colors.deepPurple, fontSize: 16),
-                ),
-              const SizedBox(height: 16),
-              TextField(
-                maxLines: 5,
-                decoration: InputDecoration(
-                  labelText: 'Reason',
-                  alignLabelWithHint: true,
-                  labelStyle: const TextStyle(color: Colors.deepPurple),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.deepPurple),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.deepPurple.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
-                  ),
-                  filled: true,
-                  fillColor: Colors.deepPurple.shade50,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  ),
-                  child: const Text(
-                    'Submit',
-                    style: TextStyle(color: Colors.black),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Duration',
+                          labelStyle: const TextStyle(color: Colors.deepPurple),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Colors.deepPurple.shade50,
+                        ),
+                        value: _selectedDuration,
+                        hint: const Text("Select an option"),
+                        items: ['Full Day', 'Half Day', 'Custom']
+                            .map((duration) => DropdownMenuItem(
+                                  value: duration,
+                                  child: Text(duration),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedDuration = value;
+                            _showCustomDuration = value == 'Custom';
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      if (_showCustomDuration) ...[
+                        TextField(
+                          controller: _startDateController,
+                          decoration: InputDecoration(
+                            labelText: 'Start Date (YYYY-MM-DD)',
+                            labelStyle:
+                                const TextStyle(color: Colors.deepPurple),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.deepPurple.shade50,
+                          ),
+                          keyboardType: TextInputType.datetime,
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _endDateController,
+                          decoration: InputDecoration(
+                            labelText: 'End Date (YYYY-MM-DD)',
+                            labelStyle:
+                                const TextStyle(color: Colors.deepPurple),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.deepPurple.shade50,
+                          ),
+                          keyboardType: TextInputType.datetime,
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _reasonController,
+                        maxLines: 5,
+                        decoration: InputDecoration(
+                          labelText: 'Reason',
+                          alignLabelWithHint: true,
+                          labelStyle:
+                              const TextStyle(color: Color.fromARGB(255, 251, 250, 252)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Colors.deepPurple.shade50,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: submitLeaveRequest,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          textStyle: const TextStyle(fontSize: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Submit Leave Request'),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
