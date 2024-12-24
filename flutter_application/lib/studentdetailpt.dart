@@ -6,6 +6,9 @@ import 'package:provider/provider.dart';
 import 'parent_login_page.dart';
 import 'parent_home_page.dart';
 import 'announcement_P.dart';
+import 'concerns.dart';
+import 'marksheet_page.dart';
+import 'apply_leaveP.dart';
 
 class StudentDetailsPage extends StatefulWidget {
   final String loggedInRollNo;
@@ -85,37 +88,44 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                 ),
               ),
             ),
-            ListTile(
+           ListTile(
               leading: const Icon(Icons.home, color: Colors.deepPurple),
               title: const Text('Home'),
-              onTap: () {
-                  Navigator.pop(context); // Close the drawer
-
-                  // Get the username from UserProvider
-                  final username = Provider.of<UserProvider>(context, listen: false).username;
-
-
-                  // Navigate to ParentHomePage with the username
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ParentHomePage(username: username),
-                    ),
-                  );
-                },
-
+               onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ParentHomePage(
+                          username: userProvider.username, // Pass the roll number from UserProvider
+                        ),
+                      ),
+                    );
+                  },
             ),
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
-              onTap: () {},
+             onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StudentDetailsPage(
+                          loggedInRollNo: userProvider.username, // Pass the roll number from UserProvider
+                        ),
+                      ),
+                    );
+                  },
+
             ),
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
               title: const Text('Announcements'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
-                // Navigate to the login screen when the user logs out
+                Navigator.pop(context); 
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => AnnouncementsPage()),
@@ -123,14 +133,37 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.assignment, color: Colors.deepPurple),
+              title: const Text('Marksheet'),
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MarksPage()),
+                );
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
               title: const Text('Apply for Leave'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ApplyForLeavePage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.announcement, color: Colors.deepPurple),
               title: const Text('Concerns'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ConcernsPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),

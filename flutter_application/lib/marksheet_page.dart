@@ -3,6 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'UserProvider.dart';
+import 'announcement_P.dart';
+import 'apply_leaveP.dart';
+import 'studentdetailpt.dart';
+import 'parent_home_page.dart';
+import 'parent_login_page.dart';
+import 'concerns.dart';
+
 
 class MarksPage extends StatefulWidget {
   @override
@@ -87,20 +94,48 @@ class _MarksPageState extends State<MarksPage> {
                 ),
               ),
             ),
-            ListTile(
+           ListTile(
               leading: const Icon(Icons.home, color: Colors.deepPurple),
               title: const Text('Home'),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to Home Page
-              },
+               onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ParentHomePage(
+                          username: userProvider.username, // Pass the roll number from UserProvider
+                        ),
+                      ),
+                    );
+                  },
             ),
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
+             onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StudentDetailsPage(
+                          loggedInRollNo: userProvider.username, // Pass the roll number from UserProvider
+                        ),
+                      ),
+                    );
+                  },
+
+            ),
+            ListTile(
+              leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
+              title: const Text('Announcements'),
               onTap: () {
-                Navigator.pop(context);
-                // Navigate to Student Details Page
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AnnouncementsPage()),
+                );
               },
             ),
             ListTile(
@@ -108,15 +143,44 @@ class _MarksPageState extends State<MarksPage> {
               title: const Text('Marksheet'),
               onTap: () {
                 Navigator.pop(context);
-                // Already on this page
               },
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
+              title: const Text('Apply for Leave'),
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ApplyForLeavePage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.announcement, color: Colors.deepPurple),
+              title: const Text('Concerns'),
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ConcernsPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
+              title: const Text('Contact Us'),
+              onTap: () {},
             ),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.deepPurple),
               title: const Text('Logout'),
               onTap: () {
                 Navigator.pop(context);
-                // Navigate to Logout Page
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ParentLoginPage()),
+                );
               },
             ),
           ],

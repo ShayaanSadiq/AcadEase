@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+import 'UserProvider.dart';
+import 'apply_leaveP.dart';
+import 'concerns.dart';
+import 'package:provider/provider.dart';
+import 'parent_home_page.dart';
+import 'marksheet_page.dart';
+import 'studentdetailpt.dart';
+import 'parent_login_page.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -104,32 +111,75 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
             ListTile(
               leading: const Icon(Icons.home, color: Colors.deepPurple),
               title: const Text('Home'),
-              onTap: () {},
+               onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ParentHomePage(
+                          username: userProvider.username, // Pass the roll number from UserProvider
+                        ),
+                      ),
+                    );
+                  },
             ),
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
-              onTap: () {},
+             onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StudentDetailsPage(
+                          loggedInRollNo: userProvider.username, // Pass the roll number from UserProvider
+                        ),
+                      ),
+                    );
+                  },
+
             ),
             ListTile(
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
               title: const Text('Announcements'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); 
+              },
             ),
             ListTile(
               leading: const Icon(Icons.assignment, color: Colors.deepPurple),
               title: const Text('Marksheet'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MarksPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
               title: const Text('Apply for Leave'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ApplyForLeavePage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.announcement, color: Colors.deepPurple),
               title: const Text('Concerns'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ConcernsPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
@@ -137,10 +187,14 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
               onTap: () {},
             ),
             ListTile(
-              leading: const Icon(Icons.logout),
+              leading: const Icon(Icons.logout, color: Colors.deepPurple),
               title: const Text('Logout'),
               onTap: () {
-                // Handle Logout tap
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ParentLoginPage()),
+                );
               },
             ),
           ],

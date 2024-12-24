@@ -6,6 +6,9 @@ import 'studentdetailpt.dart';
 import 'announcement_P.dart';
 import 'package:provider/provider.dart';
 import 'UserProvider.dart';
+import 'concerns.dart';
+import 'parent_home_page.dart';
+import 'marksheet_page.dart';
 
 class ApplyForLeavePage extends StatefulWidget {
   const ApplyForLeavePage({super.key});
@@ -163,40 +166,34 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
                 ),
               ),
             ),
-            ListTile(
+           ListTile(
               leading: const Icon(Icons.home, color: Colors.deepPurple),
               title: const Text('Home'),
-              onTap: () {},
+               onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ParentHomePage(
+                          username: userProvider.username, // Pass the roll number from UserProvider
+                        ),
+                      ),
+                    );
+                  },
             ),
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
              onTap: () {
-                    final userRollNumber = Provider.of<UserProvider>(context, listen: false).username;
-
-                    if (userRollNumber.isEmpty) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Error'),
-                          content: const Text('User roll number is missing. Please log in again.'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Text('OK'),
-                            ),
-                          ],
-                        ),
-                      );
-                      return;
-                    }
-
+                    Navigator.pop(context); // Close the drawer
+                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => StudentDetailsPage(loggedInRollNo: userRollNumber),
+                        builder: (context) => StudentDetailsPage(
+                          loggedInRollNo: userProvider.username, // Pass the roll number from UserProvider
+                        ),
                       ),
                     );
                   },
@@ -206,20 +203,55 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
               leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
               title: const Text('Announcements'),
               onTap: () {
-                Navigator.push(
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => AnnouncementsPage()),
                 );
               },
             ),
             ListTile(
+              leading: const Icon(Icons.assignment, color: Colors.deepPurple),
+              title: const Text('Marksheet'),
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MarksPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
+              title: const Text('Apply for Leave'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.announcement, color: Colors.deepPurple),
+              title: const Text('Concerns'),
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ConcernsPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
+              title: const Text('Contact Us'),
+              onTap: () {},
+            ),
+            ListTile(
               leading: const Icon(Icons.logout, color: Colors.deepPurple),
               title: const Text('Logout'),
               onTap: () {
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const ParentLoginPage()),
+                  MaterialPageRoute(builder: (context) => const ParentLoginPage()),
                 );
               },
             ),
