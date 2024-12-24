@@ -1,3 +1,4 @@
+import pandas as pd 
 from unittest import result
 import pymysql
 from flask import Flask, g, jsonify, request
@@ -426,6 +427,67 @@ def add_concern():
     except Exception as e:
         logging.error(f"Error: {e}")
         return jsonify({'message': 'An error occurred.'}), 500
+
+@app.route('/get_attendance', methods=['POST'])
+def get_attendance_percentage():
+    data = request.json
+    logging.debug(f"Received data: {data}")  # Log the raw data received
+
+    username = data.get('rollno')
+
+    if not username:
+        logging.warning("Roll number is missing in the request.")
+        return jsonify({"error": "Roll number is required"}), 400
+
+    try:
+        logging.debug(f"Roll number received: {username}")
+        try:
+            username = int(username)
+            logging.debug(f"Converted roll number to integer: {username}")
+        except ValueError:
+            logging.warning("Invalid roll number format.")
+            return jsonify({"error": "Invalid roll number format"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Define the date range
+        start_date = '2024-11-01'
+        end_date = '2024-12-30'
+
+        # Create the list of dates with required format
+        dates = pd.date_range(start=start_date, end=end_date).strftime('%Y-%m-%d').tolist()
+
+        # Dynamically build the query for each date
+        query_parts = []
+        for date in dates:
+            formatted_date = datetime.strptime(date, '%Y-%m-%d').strftime('%d-%m-%Y')  # Convert date format
+            query_parts.append(f"SELECT rollno, '{formatted_date}' AS date, `{formatted_date}` AS attendance_percentage FROM day_att.month_att WHERE rollno = %s")
+
+        # Combine the query parts with UNION
+        query = " UNION ".join(query_parts)
+
+        cursor.execute(query, (username,) * len(dates))  # Execute query for the rollno across multiple dates
+        attendance = cursor.fetchall()
+
+        if attendance:
+            # Prepare the result, converting to a dictionary format with fixed date format
+            attendance_data = {
+                datetime.strptime(entry[1], '%d-%m-%Y').strftime('%Y-%m-%d'): int(entry[2])
+                for entry in attendance}
+
+            logging.debug(f"Attendance data for rollno {username}: {attendance_data}")
+            return jsonify(attendance_data)
+        else:
+            logging.warning(f"No attendance found for rollno: {username}")
+            return jsonify({"error": "No attendance data found for the provided roll number."}), 404
+
+    except Exception as e:
+        logging.error(f"Failed to fetch attendance data: {str(e)}")
+        return jsonify({"error": f"Failed to fetch attendance data: {e}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 
 if __name__ == '__main__':

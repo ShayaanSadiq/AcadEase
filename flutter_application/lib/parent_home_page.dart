@@ -15,6 +15,7 @@ class ParentHomePage extends StatefulWidget {
   final String username;  // Added username parameter
 
   const ParentHomePage({super.key, required this.username});
+  
 
   @override
   _ParentHomePageState createState() => _ParentHomePageState();
@@ -23,31 +24,55 @@ class ParentHomePage extends StatefulWidget {
       class _ParentHomePageState extends State<ParentHomePage> {
         final String apiUrl = 'http://127.0.0.1:5000/student_details';
         late Future<Map<String, dynamic>> _studentDetails = Future.value({});
+        // Add this at line 18 (inside _ParentHomePageState class)
+        Future<Map<DateTime, double>> _attendanceData = Future.value({});
+
 
         Future<Map<String, dynamic>> fetchStudentDetails(String rollNo) async {
-          final response = await http.post(
-            Uri.parse(apiUrl),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode({'rollno': rollNo}),
-          );
+            print('Fetching student details for rollNo: $rollNo');
+            final response = await http.post(
+              Uri.parse(apiUrl),
+              headers: {'Content-Type': 'application/json'},
+              body: json.encode({'rollno': rollNo}),  // Ensure rollNo is passed correctly
+            );
 
-          if (response.statusCode == 200) {
-            return json.decode(response.body);
-          } else {
-            throw Exception('Failed to load student details');
+            if (response.statusCode == 200) {
+              return json.decode(response.body);
+            } else {
+              throw Exception('Failed to load student details');
+            }
           }
-        }
 
-        @override
-        void initState() {
-          super.initState();
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+          Future<Map<DateTime, double>> fetchAttendance(String username) async {
+                print('Fetching attendance for username: $username');
+                final response = await http.post(
+                  Uri.parse('http://127.0.0.1:5000/get_attendance'),
+                  headers: {'Content-Type': 'application/json'},
+                  body: json.encode({'rollno': username.toString()}),  // Ensure username is passed correctly
+                );
+
+                if (response.statusCode == 200) {
+                  final Map<String, dynamic> data = json.decode(response.body);
+                  // Convert the values from int to double
+                  return data.map((key, value) => MapEntry(DateTime.parse(key), value.toDouble()));
+                } else {
+                  throw Exception('Failed to fetch attendance data');
+                }
+              }
+
+
+        // Update initState function at line 40
+          @override
+          void initState() {
+            super.initState();
             final userProvider = Provider.of<UserProvider>(context, listen: false);
+            String username = userProvider.username;
+            
             setState(() {
-              _studentDetails = fetchStudentDetails(userProvider.username);
+              _studentDetails = fetchStudentDetails(username);
+              _attendanceData = fetchAttendance(username);
             });
-          });
-        }
+          }
 
 
   @override
@@ -269,16 +294,22 @@ class ParentHomePage extends StatefulWidget {
                   },
                 ),
               ),
-              const SizedBox(height: 10),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: TableCalendar(
+          const SizedBox(height: 10),
+          FutureBuilder<Map<DateTime, double>>(
+            future: _attendanceData,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'Error: ${snapshot.error}',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                );
+              } else if (snapshot.hasData) {
+                final attendance = snapshot.data!;
+                return TableCalendar(
                   focusedDay: DateTime.now(),
                   firstDay: DateTime.utc(2000, 1, 1),
                   lastDay: DateTime.utc(2030, 12, 31),
@@ -291,27 +322,56 @@ class ParentHomePage extends StatefulWidget {
                       color: Colors.blueAccent,
                       shape: BoxShape.circle,
                     ),
+                    cellMargin: EdgeInsets.all(5.0),
+                    outsideDaysVisible: false,
                   ),
-                ),
-              ),
+                  calendarBuilders: CalendarBuilders(
+                    defaultBuilder: (context, day, focusedDay) {
+                      // Normalize the date by removing time components
+                      DateTime normalizedDay = DateTime(day.year, day.month, day.day);
+
+                      if (attendance.containsKey(normalizedDay)) {
+                        final percentage = attendance[normalizedDay]!;
+                        int roundedPercentage = percentage.round();
+
+                        // Determine background color based on attendance percentage
+                        Color bgColor;
+                        if (roundedPercentage >= 75) {
+                          bgColor = Colors.green;
+                        } else if (roundedPercentage >= 50) {
+                          bgColor = Colors.orange;
+                        } else {
+                          bgColor = Colors.red;
+                        }
+
+                        return Container(
+                          margin: const EdgeInsets.all(4.0),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: bgColor,
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          child: Text(
+                            '${day.day}',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        );
+                      }
+                      return null;
+                    },
+                  ),
+                );
+              } else {
+                return const Text('No attendance data available');
+              }
+            },
+          ),
+
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.deepPurple),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      onTap: onTap,
     );
   }
 }
