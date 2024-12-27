@@ -17,8 +17,8 @@ def get_db_connection():
         conn = pymysql.connect(
             host="localhost",
             user="root",
-            password="acadease27",
-            database="day_att"
+            password="root",
+            database="studentdb"
         )
         logging.debug("Database connection established.")
         return conn
@@ -134,6 +134,112 @@ def student_details():
     except Exception as e:
         logging.error(f"Failed to fetch student details: {str(e)}")
         return jsonify({"error": "Failed to fetch student details."}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/teacher_details', methods=['POST'])
+def teacher_details():
+    data = request.json
+    id = data.get('id')
+
+    if not id:
+        logging.warning("Teacher ID is missing in the request.")
+        return jsonify({"error": "Teacher ID is required"}), 400
+
+    try:
+        # Try parsing the rollno to an integer and print the value
+        logging.debug(f"Teacher ID received: {id}")
+
+        try:
+            id = int(id)  # Convert rollno to integer if it's in string format
+            logging.debug(f"Converted Teacher ID to integer: {id}")
+        except ValueError:
+            logging.warning("Invalid Teacher ID format.")
+            return jsonify({"error": "Invalid Teacher ID format"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Fetch student details
+        teacher_query = f"""
+            SELECT `Teacher ID`,`Teacher Name`, `DOB`, `Teacher email`,
+            `Teacher mobile`
+            FROM teacher_details
+            WHERE `Teacher ID` = %s
+        """
+        cursor.execute(teacher_query, (id,))
+        teacher = cursor.fetchone()
+        
+        if teacher:
+            teacher_data = {
+                "id": teacher[0],
+                "name": teacher[1],
+                "dob": teacher[2],
+                "email": teacher[3],
+                "mobile": teacher[4],
+            }
+            return jsonify(teacher_data)
+        else:
+            logging.warning(f"No teacher found with ID: {id}")
+            return {"error": "Teacher not found."}
+
+    except Exception as e:
+        logging.error(f"Failed to fetch teacher details: {str(e)}")
+        return jsonify({"error": "Failed to fetch teacher details."}), 500
+    finally:
+        cursor.close()
+        conn.close()
+@app.route('/teacher_timetable', methods=['POST'])
+def teacher_timetable():
+    data = request.json
+    id = data.get('id')
+
+    if not id:
+        logging.warning("Teacher ID is missing in the request.")
+        return jsonify({"error": "Teacher ID is required"}), 400
+
+    try:
+        logging.debug(f"Teacher ID received: {id}")
+
+        try:
+            id = int(id)  # Convert ID to integer if it's in string format
+            logging.debug(f"Converted Teacher ID to integer: {id}")
+        except ValueError:
+            logging.warning("Invalid Teacher ID format.")
+            return jsonify({"error": "Invalid Teacher ID format"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        table_name = f"{id}timetable"  
+        # Query to fetch timetable data
+        teacher_query = f"""
+            SELECT `Period/Day`, `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`
+            FROM {table_name}
+        """
+
+        cursor.execute(teacher_query)
+        timetable = cursor.fetchall()
+
+        if timetable:
+            timetable_data = []
+            for row in timetable:
+                timetable_data.append({
+                    "period": row[0],
+                    "monday": row[1],
+                    "tuesday": row[2],
+                    "wednesday": row[3],
+                    "thursday": row[4],
+                    "friday": row[5],
+                })
+            return jsonify({"timetable": timetable_data})
+        else:
+            logging.warning(f"No timetable found for Teacher ID: {id}")
+            return jsonify({"error": "No timetable found."}), 404
+
+    except Exception as e:
+        logging.error(f"Failed to fetch timetable: {str(e)}")
+        return jsonify({"error": "Failed to fetch timetable."}), 500
     finally:
         cursor.close()
         conn.close()

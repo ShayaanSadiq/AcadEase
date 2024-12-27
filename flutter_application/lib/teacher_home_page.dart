@@ -1,26 +1,101 @@
+import 'dart:convert';
+import 'package:AcadEase/announcement_P.dart';
+import 'package:AcadEase/markatt.dart';
+import 'package:AcadEase/teacher_concern_page.dart';
+import 'package:AcadEase/teacher_login_page.dart';
+import 'package:AcadEase/teacher_roll_input_page.dart';
 import 'package:flutter/material.dart';
-import 'teacher_login_page.dart';
-import 'markatt.dart';
+import 'package:http/http.dart' as http;
 
-class TeacherHomePage extends StatelessWidget {
-  const TeacherHomePage({super.key});
+class TeacherHomePage extends StatefulWidget {
+  final String username1;
+
+  const TeacherHomePage({super.key, required this.username1});
+
+  @override
+  _TeacherHomePageState createState() => _TeacherHomePageState();
+}
+
+class _TeacherHomePageState extends State<TeacherHomePage> {
+  final String teacherDetailsApiUrl = 'http://127.0.0.1:5000/teacher_details';
+  final String timetableApiUrl = 'http://127.0.0.1:5000/teacher_timetable';
+
+  late Future<Map<String, dynamic>> _teacherDetails;
+  late Future<List<Map<String, dynamic>>> _timetable;
+
+  // Fetch teacher details
+  Future<Map<String, dynamic>> fetchTeacherDetails() async {
+    final response = await http.post(
+      Uri.parse(teacherDetailsApiUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'id': widget.username1}),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load Teacher details');
+    }
+  }
+
+  // Fetch timetable
+  Future<List<Map<String, dynamic>>> fetchTimetable() async {
+    final response = await http.post(
+      Uri.parse(timetableApiUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'id': widget.username1}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data.containsKey('timetable')) {
+        return List<Map<String, dynamic>>.from(data['timetable']);
+      } else {
+        throw Exception(data['error'] ?? 'Failed to load timetable');
+      }
+    } else {
+      throw Exception('Failed to fetch timetable');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _teacherDetails = fetchTeacherDetails();
+    _timetable = fetchTimetable();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Teacher Home'),
+      appBar:  AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: const Text(
+          'Teacher Home',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
       ),
+      extendBodyBehindAppBar: true,
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            const DrawerHeader(
+            DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                gradient: LinearGradient(
+                  colors: [Colors.deepPurple.shade300, Colors.deepPurple.shade700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
               ),
-              child: Text(
-                'Teacher Menu',
+              child: const Text(
+                'Menu',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -28,41 +103,66 @@ class TeacherHomePage extends StatelessWidget {
               ),
             ),
             ListTile(
+              leading: const Icon(Icons.home, color: Colors.deepPurple),
+              title: const Text('Home'),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: const Icon(Icons.school, color: Colors.deepPurple),
               title: const Text('Student Details'),
               onTap: () {
-                // Navigate to Student Details screen
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TeacherRollInputPage(),
+                  ),
+                );
               },
             ),
             ListTile(
+              leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
               title: const Text('Announcements'),
               onTap: () {
-                // Navigate to Announcements screen
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AnnouncementsPage()),
+                );
               },
             ),
             ListTile(
+              leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
+              title: const Text('Apply for Leave'),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: const Icon(Icons.announcement, color: Colors.deepPurple),
               title: const Text('Concerns'),
               onTap: () {
-                // Navigate to Concerns screen
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => TeacherConcernPage()),
+                );
               },
             ),
             ListTile(
-              title: const Text('Upload Student Attendance'),
+              leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
+              title: const Text('Upload Student Attendance  '),
               onTap: () {
-                // Navigate to Upload Student Attendance screen
-                Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => const AttendancePage()),
-                ); // Close the drawer
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AttendancePage()),
+                );
               },
             ),
-            const Divider(), // Divider between options and logout
             ListTile(
-              title: const Text('Log Out'),
+              leading: const Icon(Icons.logout, color: Colors.deepPurple),
+              title: const Text('Logout'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
-                // Navigate to the login screen when the user logs out
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const TeacherLoginPage()),
@@ -72,10 +172,190 @@ class TeacherHomePage extends StatelessWidget {
           ],
         ),
       ),
-      body: const Center(
-        child: Text(
-          'Welcome to the Teacher Home Page!',
-          style: TextStyle(fontSize: 18),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.deepPurple.shade200, Colors.deepPurple.shade50],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 40),
+              // Teacher Details Section
+              FutureBuilder<Map<String, dynamic>>(
+                future: _teacherDetails,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  } else if (snapshot.hasData) {
+                    final teacher = snapshot.data!;
+                    return Card(
+                      margin: const EdgeInsets.all(10),
+                      elevation: 3,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Image.asset(
+                                'assets/tchimg/${teacher['id']}.png',
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(Icons.error, color: Colors.red, size: 40);
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Name: ${teacher['name']}',
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text('Teacher ID: ${teacher['id']}'),
+                                  Text('Date of Birth: ${teacher['dob']}'),
+                                  Text('Email Address: ${teacher['email']}'),
+                                  Text('Phone Number: ${teacher['mobile']}'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  } else {
+                    return const Text('No data available');
+                  }
+                },
+              ),
+              const SizedBox(height: 20),
+              // Timetable Section
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: _timetable,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  } else if (snapshot.hasData) {
+                    final timetable = snapshot.data!;
+                    return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      elevation: 3,
+                      child: Table(
+                        border: TableBorder.all(),
+                        children: [
+                          // Table Header
+                          const TableRow(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Period/Day',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Monday',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Tuesday',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Wednesday',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Thursday',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Friday',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                          ...timetable.map((row) {
+                            return TableRow(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(row['period']),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(row['monday']),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(row['tuesday']),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(row['wednesday']),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(row['thursday']),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(row['friday']),
+                                ),
+                              ],
+                            );
+                          }),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return const Text('No timetable available');
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

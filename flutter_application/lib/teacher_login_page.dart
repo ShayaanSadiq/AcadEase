@@ -16,8 +16,6 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _tlogin() async {
-    setState(() {
-    });
 
     String username = _usernameController.text;
     String password = _passwordController.text;
@@ -37,13 +35,14 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success') {
-          setState(() {
-          });
-
           // Navigate to Parent Home Page
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const TeacherHomePage()),
+            MaterialPageRoute(
+              builder: (context){
+                return TeacherHomePage(username1: username);
+              }
+            ),
           );
         }
       } else if (response.statusCode == 401) {

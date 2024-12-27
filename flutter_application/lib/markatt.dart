@@ -1,32 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'teacher_home_page.dart';
 import 'package:http/http.dart' as http;
-
-void main() => runApp(const AttendanceApp());
-
-class AttendanceApp extends StatelessWidget {
-  const AttendanceApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Attendance App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const AttendancePage(),
-    );
-  }
-}
 
 class AttendancePage extends StatefulWidget {
   const AttendancePage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _AttendancePageState createState() => _AttendancePageState();
 }
 
@@ -34,9 +13,10 @@ class _AttendancePageState extends State<AttendancePage> {
   String? _selectedClass;
   String? _selectedPeriod;
   final List<String> _classes = ['elevena', 'elevenb', 'twelvea', 'twelveb']; // Class options
-  final List<String> _periods = ['period_1', 'period_2', 'period_3', 'period_4', 'period_5', 'period_6']; // Class options
+  final List<String> _periods = ['period_1', 'period_2', 'period_3', 'period_4', 'period_5', 'period_6']; // Period options
   List<String> _students = [];
   final Map<String, bool> _absentStudents = {}; // Tracking absence status
+
 
   // Function to fetch logged-in students
   Future<void> _fetchLoggedInStudents(String selectedClass) async {
@@ -51,7 +31,6 @@ class _AttendancePageState extends State<AttendancePage> {
       );
 
       if (response.statusCode == 200) {
-        print("Response Body: ${response.body}");
         List<dynamic> data = jsonDecode(response.body);
 
         setState(() {
@@ -77,7 +56,7 @@ class _AttendancePageState extends State<AttendancePage> {
   }
 
   // Function to mark absentees
- Future<void> _markAbsentees() async {
+  Future<void> _markAbsentees() async {
     if (_selectedClass == null || _selectedPeriod == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Please select a class and period'),
@@ -95,12 +74,6 @@ class _AttendancePageState extends State<AttendancePage> {
 
     if (absentList.isNotEmpty) {
       try {
-        print("Sending request with data: ${{
-          'class': _selectedClass,
-          'absentees': absentList,
-          'period': _selectedPeriod,
-        }}");
-
         final response = await http.post(
           Uri.parse('http://127.0.0.1:5000/mark_absent'),
           headers: {'Content-Type': 'application/json'},
@@ -110,9 +83,6 @@ class _AttendancePageState extends State<AttendancePage> {
             'period': _selectedPeriod,
           }),
         );
-
-        print("Response status: ${response.statusCode}");
-        print("Response body: ${response.body}");
 
         if (response.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -126,7 +96,6 @@ class _AttendancePageState extends State<AttendancePage> {
           ));
         }
       } catch (e) {
-        print("Error marking absentees: $e");
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('An error occurred while updating attendance'),
           backgroundColor: Colors.red,
@@ -138,8 +107,7 @@ class _AttendancePageState extends State<AttendancePage> {
         backgroundColor: Colors.orange,
       ));
     }
-}
-
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,15 +115,6 @@ class _AttendancePageState extends State<AttendancePage> {
       appBar: AppBar(
         title: const Text('Attendance App'),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TeacherHomePage()),
-                ); // Redirect to teacher_home_page
-          },
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -192,7 +151,7 @@ class _AttendancePageState extends State<AttendancePage> {
               value: _selectedPeriod,
               hint: const Text('Select Period'),
               isExpanded: true,
-              items: _periods.map((String period){
+              items: _periods.map((String period) {
                 return DropdownMenuItem<String>(
                   value: period,
                   child: Text(period),
