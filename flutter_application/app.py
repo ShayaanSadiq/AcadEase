@@ -1,3 +1,4 @@
+import pandas as pd 
 from unittest import result
 import pymysql
 from flask import Flask, g, jsonify, request
@@ -9,7 +10,8 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
 
 def get_db_connection():
     try:
@@ -384,6 +386,215 @@ def mark_absent():
         conn.close()
 
     return jsonify({"message": "Attendance updated successfully"})
+
+@app.route('/announcements', methods=['GET'])
+def get_announcements():
+    try:
+        # Establish database connection
+        conn = get_db_connection()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)  # Use DictCursor to get results as dictionaries
+
+        # Fetch announcements ordered by date in descending order
+        query = "SELECT subject, `desc`, `date` FROM announcements ORDER BY date DESC"
+        cursor.execute(query)
+        announcements = cursor.fetchall()
+
+        # Close database connection
+        cursor.close()
+        conn.close()
+
+        # Check if announcements exist
+        if not announcements:
+            return jsonify({"message": "No announcements available"}), 404
+
+        # Return announcements
+        return jsonify(announcements), 200
+
+    except pymysql.MySQLError as e:
+        logging.error(f"MySQL Error: {str(e)}")
+        return jsonify({"error": "Database error occurred"}), 500
+    except Exception as e:
+        logging.error(f"Error: {str(e)}")
+        return jsonify({"error": "An error occurred"}), 500
+
+# Set up logging for debugging
+logging.basicConfig(level=logging.DEBUG)
+
+@app.route('/add_leave', methods=['POST'])
+def add_leave():
+    try:
+        logging.debug("Request data: %s", request.json)
+        
+        # Get data from the request
+        rollno = request.json.get('rollno')
+        desc = request.json.get('desc')
+        duration = request.json.get('duration')
+        
+        # Validate parameters
+        if not rollno or not desc or not duration:
+            return jsonify({"error": "Missing required parameters"}), 400
+
+        # Connect to the database
+        connection = get_db_connection()
+        cursor = connection.cursor()
+
+        # Insert data into leavep table
+        query = "INSERT INTO leavep (rollno, `desc`, duration) VALUES (%s, %s, %s)"
+        cursor.execute(query, (rollno, desc, duration))
+
+        # Commit the transaction
+        connection.commit()
+
+        # Close the connection
+        cursor.close()
+        connection.close()
+
+        return jsonify({"message": "Leave added successfully"}), 201
+
+    except pymysql.MySQLError as e:
+        logging.error(f"MySQL error: {str(e)}")
+        return jsonify({"error": f"MySQL error: {str(e)}"}), 500
+    except Exception as e:
+        logging.error(f"An unexpected error occurred: {str(e)}")
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+@app.route('/marksheet', methods=['GET'])
+def get_marksheet():
+    username = request.headers.get('Username')
+    if not username:
+        return jsonify({"error": "Username is required"}), 400
+
+    try:
+        conn = pymysql.connect(
+            host='localhost',
+            user='root',
+            password='acadease27',
+            database='day_att',
+        )
+
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            query = "SELECT * FROM marksheet WHERE rollno = %s LIMIT 1"
+            cursor.execute(query, (username,))
+            result = cursor.fetchone()  # Fetch only one record
+
+            if not result:
+                return jsonify({"error": "No records found for the given username"}), 404
+
+            return jsonify(result)  # Return a single record
+
+    except pymysql.MySQLError as db_error:
+        print(f"Database Error: {db_error}")
+        return jsonify({"error": "Database error occurred"}), 500
+
+    except Exception as e:
+        print(f"Unexpected Error: {e}")
+        return jsonify({"error": "An unexpected error occurred"}), 500
+
+    finally:
+        conn.close()
+
+
+@app.route('/add_concern', methods=['POST'])
+def add_concern():
+    try:
+        # Parse JSON data from the frontend
+        data = request.json
+        rollno = data.get('rollno')
+        date = data.get('date')
+        subject = data.get('subject')
+        description = data.get('desc')
+
+        # Validate the required fields
+        if not rollno or not date or not subject or not description:
+            return jsonify({'message': 'All fields are required.'}), 400
+
+        # Connect to the MySQL database
+        conn = get_db_connection()  # Reuse the `get_db_connection` function
+        cursor = conn.cursor()
+
+        # Insert data into the concerns table
+        query = """
+            INSERT INTO concerns (rollno, date, subject, `desc`)
+            VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(query, (rollno, date, subject, description))
+        conn.commit()
+
+        # Close the database connection
+        cursor.close()
+        conn.close()
+
+        return jsonify({'message': 'Concern added successfully.'}), 201
+
+    except pymysql.MySQLError as err:
+        logging.error(f"Database Error: {err}")
+        return jsonify({'message': 'Database error occurred.'}), 500
+
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        return jsonify({'message': 'An error occurred.'}), 500
+
+@app.route('/get_attendance', methods=['POST'])
+def get_attendance_percentage():
+    data = request.json
+    logging.debug(f"Received data: {data}")  # Log the raw data received
+
+    username = data.get('rollno')
+
+    if not username:
+        logging.warning("Roll number is missing in the request.")
+        return jsonify({"error": "Roll number is required"}), 400
+
+    try:
+        logging.debug(f"Roll number received: {username}")
+        try:
+            username = int(username)
+            logging.debug(f"Converted roll number to integer: {username}")
+        except ValueError:
+            logging.warning("Invalid roll number format.")
+            return jsonify({"error": "Invalid roll number format"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Define the date range
+        start_date = '2024-11-01'
+        end_date = '2024-12-30'
+
+        # Create the list of dates with required format
+        dates = pd.date_range(start=start_date, end=end_date).strftime('%Y-%m-%d').tolist()
+
+        # Dynamically build the query for each date
+        query_parts = []
+        for date in dates:
+            formatted_date = datetime.strptime(date, '%Y-%m-%d').strftime('%d-%m-%Y')  # Convert date format
+            query_parts.append(f"SELECT rollno, '{formatted_date}' AS date, `{formatted_date}` AS attendance_percentage FROM day_att.month_att WHERE rollno = %s")
+
+        # Combine the query parts with UNION
+        query = " UNION ".join(query_parts)
+
+        cursor.execute(query, (username,) * len(dates))  # Execute query for the rollno across multiple dates
+        attendance = cursor.fetchall()
+
+        if attendance:
+            # Prepare the result, converting to a dictionary format with fixed date format
+            attendance_data = {
+                datetime.strptime(entry[1], '%d-%m-%Y').strftime('%Y-%m-%d'): int(entry[2])
+                for entry in attendance}
+
+            logging.debug(f"Attendance data for rollno {username}: {attendance_data}")
+            return jsonify(attendance_data)
+        else:
+            logging.warning(f"No attendance found for rollno: {username}")
+            return jsonify({"error": "No attendance data found for the provided roll number."}), 404
+
+    except Exception as e:
+        logging.error(f"Failed to fetch attendance data: {str(e)}")
+        return jsonify({"error": f"Failed to fetch attendance data: {e}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
