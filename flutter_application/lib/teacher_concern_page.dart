@@ -1,20 +1,10 @@
 import 'package:flutter/material.dart';
-void main() {
-  runApp(TeacherConcernApp());
-}
 
-class TeacherConcernApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Teacher Concern Page',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: TeacherConcernPage(),
-    );
-  }
-}
 
 class TeacherConcernPage extends StatefulWidget {
+    
+    const TeacherConcernPage({super.key});
+  
   @override
   _TeacherConcernPageState createState() => _TeacherConcernPageState();
 }
@@ -28,7 +18,13 @@ class _TeacherConcernPageState extends State<TeacherConcernPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Teacher Concern Page')),
+      appBar: AppBar(
+        title: const Text('Teacher Concern Page'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {},
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -38,7 +34,7 @@ class _TeacherConcernPageState extends State<TeacherConcernPage> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Name',
                   border: OutlineInputBorder(),
                 ),
@@ -49,9 +45,9 @@ class _TeacherConcernPageState extends State<TeacherConcernPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Category',
                   border: OutlineInputBorder(),
                 ),
@@ -74,11 +70,11 @@ class _TeacherConcernPageState extends State<TeacherConcernPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _concernController,
                 maxLines: 4,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Concern',
                   border: OutlineInputBorder(),
                 ),
@@ -89,7 +85,7 @@ class _TeacherConcernPageState extends State<TeacherConcernPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Center(
                 child: ElevatedButton(
                   onPressed: () {
@@ -103,13 +99,13 @@ class _TeacherConcernPageState extends State<TeacherConcernPage> {
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: Text('Concern Submitted'),
+                          title: const Text('Concern Submitted'),
                           content: Text(
                               'Name: $name\nCategory: $category\nConcern: $concern'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: Text('OK'),
+                              child: const Text('OK'),
                             ),
                           ],
                         ),
@@ -123,7 +119,7 @@ class _TeacherConcernPageState extends State<TeacherConcernPage> {
                       });
                     }
                   },
-                  child: Text('Submit'),
+                  child: const Text('Submit'),
                 ),
               ),
             ],

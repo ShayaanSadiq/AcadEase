@@ -568,7 +568,7 @@ def get_attendance_percentage():
         query_parts = []
         for date in dates:
             formatted_date = datetime.strptime(date, '%Y-%m-%d').strftime('%d-%m-%Y')  # Convert date format
-            query_parts.append(f"SELECT rollno, '{formatted_date}' AS date, `{formatted_date}` AS attendance_percentage FROM day_att.month_att WHERE rollno = %s")
+            query_parts.append(f"SELECT rollno, '{formatted_date}' AS date, `{formatted_date}` AS attendance_percentage FROM studentdb.month_att WHERE rollno = %s")
 
         # Combine the query parts with UNION
         query = " UNION ".join(query_parts)
