@@ -42,9 +42,8 @@ def get_db_connection():
         return mysql.connector.connect(
             host="localhost",
             user="root",
-            password="acadease27",
-            database="day_att",
-            auth_plugin="mysql_native_password",  # Explicitly specify auth plugin
+            password="root",
+            database="studentdb",
         )
     except mysql.connector.Error as e:
         print(f"Database connection error: {e}")

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // For JSON decoding
 import 'teacher_home_page.dart'; // Import the Teacher Home Page
+import 'package:provider/provider.dart';
+import 'UserProvider.dart';
 
 class TeacherLoginPage extends StatefulWidget {
   const TeacherLoginPage({super.key});
@@ -35,11 +37,13 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success') {
+          Provider.of<UserProvider>(context, listen: false).setUsername1(username);
           // Navigate to Parent Home Page
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context){
+                final username = Provider.of<UserProvider>(context, listen: false).username1;
                 return TeacherHomePage(username1: username);
               }
             ),

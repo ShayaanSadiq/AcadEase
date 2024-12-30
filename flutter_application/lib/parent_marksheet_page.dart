@@ -1,14 +1,15 @@
 import 'dart:convert';
+import 'package:AcadEase/parent_contact_us_page.dart';
+import 'package:AcadEase/select_role_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'UserProvider.dart';
-import 'announcement_P.dart';
-import 'apply_leaveP.dart';
-import 'studentdetailpt.dart';
+import 'parent_announcements_page.dart';
+import 'parent_apply_for_leave_page.dart';
+import 'parent_student_details_page.dart';
 import 'parent_home_page.dart';
-import 'parent_login_page.dart';
-import 'concerns.dart';
+import 'parent_concerns_page.dart';
 
 
 class MarksPage extends StatefulWidget {
@@ -170,7 +171,13 @@ class _MarksPageState extends State<MarksPage> {
             ListTile(
               leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
               title: const Text('Contact Us'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ParentContactUsPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.deepPurple),
@@ -179,7 +186,7 @@ class _MarksPageState extends State<MarksPage> {
                 Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const ParentLoginPage()),
+                  MaterialPageRoute(builder: (context) => const SelectRolePage()),
                 );
               },
             ),
@@ -222,7 +229,7 @@ class _MarksPageState extends State<MarksPage> {
             final marksData = snapshot.data!;
 
             // Check for missing data keys
-            List<String> examKeys = ['fa1', 'fa2', 'sa1', 'fa3', 'fa4', 'sa2'];
+            List<String> examKeys = ['FA1', 'FA2', 'SA1', 'FA3', 'FA4', 'SA2'];
             Map<String, dynamic> processedData = {};
             for (var key in examKeys) {
               processedData[key] = marksData.containsKey(key) ? marksData[key] : null;
@@ -255,16 +262,16 @@ class _MarksPageState extends State<MarksPage> {
                         ),
                         const SizedBox(height: 10),
                         // Display FA and SA Marks
-                        buildMarkRow('FA1', processedData['fa1']),
-                        buildMarkRow('FA2', processedData['fa2']),
-                        buildMarkRow('SA1', processedData['sa1']),
+                        buildMarkRow('FA1', processedData['FA1']),
+                        buildMarkRow('FA2', processedData['FA2']),
+                        buildMarkRow('SA1', processedData['SA1']),
                         const Divider(
                           color: Colors.grey,
                           thickness: 1,
                         ),
-                        buildMarkRow('FA3', processedData['fa3']),
-                        buildMarkRow('FA4', processedData['fa4']),
-                        buildMarkRow('SA2', processedData['sa2']),
+                        buildMarkRow('FA3', processedData['FA3']),
+                        buildMarkRow('FA4', processedData['FA4']),
+                        buildMarkRow('SA2', processedData['SA2']),
                       ],
                     ),
                   ),

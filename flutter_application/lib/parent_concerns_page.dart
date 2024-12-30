@@ -1,15 +1,16 @@
+import 'package:AcadEase/parent_contact_us_page.dart';
+import 'package:AcadEase/select_role_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'UserProvider.dart';
 import 'package:provider/provider.dart';
-import 'announcement_P.dart';
-import 'apply_leaveP.dart';
+import 'parent_announcements_page.dart';
+import 'parent_apply_for_leave_page.dart';
 import 'parent_home_page.dart';
-import 'studentdetailpt.dart';
-import 'marksheet_page.dart';
-import 'parent_login_page.dart';
-// Concerns Page
+import 'parent_student_details_page.dart';
+import 'parent_marksheet_page.dart';
+
 class ConcernsPage extends StatefulWidget {
   @override
   _ConcernsPageState createState() => _ConcernsPageState();
@@ -180,7 +181,13 @@ class _ConcernsPageState extends State<ConcernsPage> {
             ListTile(
               leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
               title: const Text('Contact Us'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ParentContactUsPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.deepPurple),
@@ -189,7 +196,7 @@ class _ConcernsPageState extends State<ConcernsPage> {
                 Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const ParentLoginPage()),
+                  MaterialPageRoute(builder: (context) => const SelectRolePage()),
                 );
               },
             ),

@@ -1,15 +1,16 @@
 import 'dart:convert';
-import 'announcement_P.dart';
-import 'apply_leaveP.dart';
+import 'package:AcadEase/parent_contact_us_page.dart';
+import 'parent_announcements_page.dart';
+import 'parent_apply_for_leave_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
 import 'parent_login_page.dart';
-import 'studentdetailpt.dart';
+import 'parent_student_details_page.dart';
 import 'package:provider/provider.dart';
-import 'marksheet_page.dart';
+import 'parent_marksheet_page.dart';
 import 'UserProvider.dart'; // Keep this as the main UserProvider import
-import 'concerns.dart';
+import 'parent_concerns_page.dart';
 
 class ParentHomePage extends StatefulWidget {
   final String username;  // Added username parameter
@@ -183,7 +184,13 @@ class ParentHomePage extends StatefulWidget {
             ListTile(
               leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
               title: const Text('Contact Us'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ParentContactUsPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.deepPurple),

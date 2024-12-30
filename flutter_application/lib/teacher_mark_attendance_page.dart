@@ -1,6 +1,14 @@
 import 'dart:convert';
+import 'package:AcadEase/UserProvider.dart';
+import 'package:AcadEase/teacher_announcements_page.dart';
+import 'package:AcadEase/teacher_apply_leave_page.dart';
+import 'package:AcadEase/teacher_concern_page.dart';
+import 'package:AcadEase/teacher_home_page.dart';
+import 'package:AcadEase/teacher_login_page.dart';
+import 'package:AcadEase/teacher_roll_input_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class AttendancePage extends StatefulWidget {
   const AttendancePage({super.key});
@@ -112,9 +120,124 @@ class _AttendancePageState extends State<AttendancePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Attendance App'),
+      appBar:  AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: const Text(
+          'Teacher Home',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         centerTitle: true,
+      ),
+      extendBodyBehindAppBar: true,
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.deepPurple.shade300, Colors.deepPurple.shade700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: const Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home, color: Colors.deepPurple),
+              title: const Text('Home'),
+              onTap: () {
+                Navigator.pop(context);
+                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TeacherHomePage(username1: userProvider.username1),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.school, color: Colors.deepPurple),
+              title: const Text('Student Details'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TeacherRollInputPage(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.campaign_sharp, color: Colors.deepPurple),
+              title: const Text('Announcements'),
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => TeacherAnnouncementsPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_month, color: Colors.deepPurple),
+              title: const Text('Apply for Leave'),
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ApplyForTeacherLeavePage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.announcement, color: Colors.deepPurple),
+              title: const Text('Concerns'),
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => TeacherConcernPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
+              title: const Text('Upload Student Attendance  '),
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AttendancePage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.deepPurple),
+              title: const Text('Logout'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => TeacherLoginPage()),
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

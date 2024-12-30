@@ -1,5 +1,5 @@
+import 'package:AcadEase/teacher_student_details_page.dart';
 import 'package:flutter/material.dart';
-import 'studentdetailpt.dart'; // Ensure the import path is correct.
 
 class TeacherRollInputPage extends StatefulWidget {
   const TeacherRollInputPage({super.key});
@@ -101,7 +101,7 @@ class _TeacherRollInputPageState extends State<TeacherRollInputPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                StudentDetailsPage(loggedInRollNo: rollNumber),
+                                StudentDetailsTeacherPage(loggedInRollNo: rollNumber),
                           ),
                         );
                       } else {

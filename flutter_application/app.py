@@ -1,8 +1,7 @@
 import pandas as pd 
-from unittest import result
 import pymysql
 from flask import Flask, g, jsonify, request
-from datetime import datetime
+from datetime import date, datetime
 from flask_cors import CORS
 import logging
 
@@ -181,6 +180,7 @@ def teacher_details():
                 "email": teacher[3],
                 "mobile": teacher[4],
             }
+            teacher_data['dob'] = teacher_data['dob'].strftime('%d-%m-%Y')
             return jsonify(teacher_data)
         else:
             logging.warning(f"No teacher found with ID: {id}")
@@ -387,6 +387,45 @@ def mark_absent():
 
     return jsonify({"message": "Attendance updated successfully"})
 
+@app.route('/add_announcement', methods=['POST'])
+def add_announcement():
+    try:
+        # Parse JSON data from the frontend
+        data = request.json
+        date = data.get('date')
+        subject = data.get('subject')
+        desc = data.get('desc')
+
+        # Validate the required fields
+        if not date or not subject or not desc:
+            return jsonify({'message': 'All fields are required.'}), 400
+
+        # Connect to the MySQL database
+        conn = get_db_connection()  # Reuse the `get_db_connection` function
+        cursor = conn.cursor()
+
+        # Insert data into the concerns table
+        query = """
+            INSERT INTO announcements (`subject`, `desc`, `date`)
+            VALUES (%s, %s, %s)
+        """
+        cursor.execute(query, (subject, desc, date))
+        conn.commit()
+
+        # Close the database connection
+        cursor.close()
+        conn.close()
+
+        return jsonify({'message': 'Announcement added successfully.'}), 201
+
+    except pymysql.MySQLError as err:
+        logging.error(f"Database Error: {err}")
+        return jsonify({'message': 'Database error occurred.'}), 500
+
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        return jsonify({'message': 'An error occurred.'}), 500
+
 @app.route('/announcements', methods=['GET'])
 def get_announcements():
     try:
@@ -407,7 +446,12 @@ def get_announcements():
         if not announcements:
             return jsonify({"message": "No announcements available"}), 404
 
+        # Convert `date` field to ISO format
+        for announcement in announcements:
+            announcement['date'] = announcement['date'].isoformat()
+
         # Return announcements
+        print(announcements)
         return jsonify(announcements), 200
 
     except pymysql.MySQLError as e:
@@ -420,8 +464,8 @@ def get_announcements():
 # Set up logging for debugging
 logging.basicConfig(level=logging.DEBUG)
 
-@app.route('/add_leave', methods=['POST'])
-def add_leave():
+@app.route('/student_leave', methods=['POST'])
+def student_leave():
     try:
         logging.debug("Request data: %s", request.json)
         
@@ -458,6 +502,44 @@ def add_leave():
         logging.error(f"An unexpected error occurred: {str(e)}")
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
+@app.route('/teacher_leave', methods=['POST'])
+def teacher_leave():
+    try:
+        logging.debug("Request data: %s", request.json)
+        
+        # Get data from the request
+        rollno = request.json.get('rollno')
+        desc = request.json.get('desc')
+        duration = request.json.get('duration')
+        
+        # Validate parameters
+        if not rollno or not desc or not duration:
+            return jsonify({"error": "Missing required parameters"}), 400
+
+        # Connect to the database
+        connection = get_db_connection()
+        cursor = connection.cursor()
+
+        # Insert data into leavep table
+        query = "INSERT INTO leavet (rollno, `desc`, duration) VALUES (%s, %s, %s)"
+        cursor.execute(query, (rollno, desc, duration))
+
+        # Commit the transaction
+        connection.commit()
+
+        # Close the connection
+        cursor.close()
+        connection.close()
+
+        return jsonify({"message": "Leave added successfully"}), 201
+
+    except pymysql.MySQLError as e:
+        logging.error(f"MySQL error: {str(e)}")
+        return jsonify({"error": f"MySQL error: {str(e)}"}), 500
+    except Exception as e:
+        logging.error(f"An unexpected error occurred: {str(e)}")
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
 @app.route('/marksheet', methods=['GET'])
 def get_marksheet():
     username = request.headers.get('Username')
@@ -468,12 +550,12 @@ def get_marksheet():
         conn = pymysql.connect(
             host='localhost',
             user='root',
-            password='acadease27',
-            database='day_att',
+            password='root',
+            database='studentdb',
         )
 
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-            query = "SELECT * FROM marksheet WHERE rollno = %s LIMIT 1"
+            query = "SELECT `FA1`,`FA2`,`SA1`,`FA3`,`FA4`,`SA2` FROM marksheet WHERE rollno = %s LIMIT 1"
             cursor.execute(query, (username,))
             result = cursor.fetchone()  # Fetch only one record
 
@@ -534,6 +616,40 @@ def add_concern():
         logging.error(f"Error: {e}")
         return jsonify({'message': 'An error occurred.'}), 500
 
+@app.route('/view_concerns', methods=['GET'])
+def get_concerns():
+    try:
+        # Establish database connection
+        conn = get_db_connection()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)  # Use DictCursor to get results as dictionaries
+
+        # Fetch concerns ordered by date in descending order
+        query = "SELECT `rollno`, `date`, `subject`, `desc` FROM concerns ORDER BY date DESC"
+        cursor.execute(query)
+        concerns = cursor.fetchall()
+
+        # Close database connection
+        cursor.close()
+        conn.close()
+
+        # Check if concerns exist
+        if not concerns:
+            return jsonify({"message": "No concerns available"}), 404
+
+        # Convert `date` field to "dd-MM-YYYY" format
+        for concern in concerns:
+            concern['date'] = concern['date'].strftime('%d-%m-%Y')
+
+        # Return concerns
+        return jsonify(concerns), 200
+
+    except pymysql.MySQLError as e:
+        logging.error(f"MySQL Error: {str(e)}")
+        return jsonify({"error": "Database error occurred"}), 500
+    except Exception as e:
+        logging.error(f"Error: {str(e)}")
+        return jsonify({"error": "An error occurred"}), 500
+
 @app.route('/get_attendance', methods=['POST'])
 def get_attendance_percentage():
     data = request.json
@@ -567,7 +683,7 @@ def get_attendance_percentage():
         # Dynamically build the query for each date
         query_parts = []
         for date in dates:
-            formatted_date = datetime.strptime(date, '%Y-%m-%d').strftime('%d-%m-%Y')  # Convert date format
+            formatted_date = datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')  # Convert date format
             query_parts.append(f"SELECT rollno, '{formatted_date}' AS date, `{formatted_date}` AS attendance_percentage FROM studentdb.month_att WHERE rollno = %s")
 
         # Combine the query parts with UNION
@@ -579,7 +695,7 @@ def get_attendance_percentage():
         if attendance:
             # Prepare the result, converting to a dictionary format with fixed date format
             attendance_data = {
-                datetime.strptime(entry[1], '%d-%m-%Y').strftime('%Y-%m-%d'): int(entry[2])
+                datetime.strptime(entry[1], '%Y-%m-%d').strftime('%Y-%m-%d'): int(entry[2])
                 for entry in attendance}
 
             logging.debug(f"Attendance data for rollno {username}: {attendance_data}")

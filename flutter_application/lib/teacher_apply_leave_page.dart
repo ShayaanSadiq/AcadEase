@@ -1,23 +1,23 @@
+import 'package:AcadEase/teacher_announcements_page.dart';
+import 'package:AcadEase/teacher_home_page.dart';
+import 'package:AcadEase/teacher_mark_attendance_page.dart';
+import 'package:AcadEase/teacher_concern_page.dart';
+import 'package:AcadEase/teacher_login_page.dart';
+import 'package:AcadEase/teacher_roll_input_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'parent_login_page.dart';
-import 'studentdetailpt.dart';
-import 'announcement_P.dart';
 import 'package:provider/provider.dart';
 import 'UserProvider.dart';
-import 'concerns.dart';
-import 'parent_home_page.dart';
-import 'marksheet_page.dart';
 
-class ApplyForLeavePage extends StatefulWidget {
-  const ApplyForLeavePage({super.key});
+class ApplyForTeacherLeavePage extends StatefulWidget {
+  const ApplyForTeacherLeavePage({super.key});
 
   @override
-  _ApplyForLeavePageState createState() => _ApplyForLeavePageState();
+  _ApplyForTeacherLeavePageState createState() => _ApplyForTeacherLeavePageState();
 }
 
-class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
+class _ApplyForTeacherLeavePageState extends State<ApplyForTeacherLeavePage> {
   String? _selectedDuration;
   bool _showCustomDuration = false;
   bool _isLoading = false;
@@ -28,7 +28,7 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
 
   Future<void> submitLeaveRequest() async {
     String? userRollNumber =
-        Provider.of<UserProvider>(context, listen: false).username;
+        Provider.of<UserProvider>(context, listen: false).username1;
 
     String duration = _selectedDuration ?? "Not Selected";
     String startDate = _startDateController.text;
@@ -56,7 +56,7 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
       return;
     }
 
-    final url = Uri.parse('http://127.0.0.1:5000/add_leave');
+    final url = Uri.parse('http://127.0.0.1:5000/teacher_leave');
 
     final Map<String, dynamic> data = {
       'rollno': userRollNumber,
@@ -138,12 +138,11 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
+      appBar:  AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         title: const Text(
-          'Apply for Leave',
+          'Teacher Leave',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -152,17 +151,15 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
         ),
         centerTitle: true,
       ),
+      extendBodyBehindAppBar: true,
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
-          children: [
+          children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Colors.deepPurple.shade300,
-                    Colors.deepPurple.shade700
-                  ],
+                  colors: [Colors.deepPurple.shade300, Colors.deepPurple.shade700],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -179,17 +176,15 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
               leading: const Icon(Icons.home, color: Colors.deepPurple),
               title: const Text('Home'),
               onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    final userProvider = Provider.of<UserProvider>(context, listen: false); // Access UserProvider
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ParentHomePage(
-                          username: userProvider.username, // Pass the roll number from UserProvider
-                        ),
-                      ),
-                    );
-                  },
+                Navigator.pop(context);
+                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TeacherHomePage(username1: userProvider.username1),
+                  ),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.school, color: Colors.deepPurple),
@@ -199,9 +194,7 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => StudentDetailsPage(
-                      loggedInRollNo: UserProvider().username,
-                    ),
+                    builder: (context) => const TeacherRollInputPage(),
                   ),
                 );
               },
@@ -213,18 +206,7 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
                 Navigator.pop(context); 
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => AnnouncementsPage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.assignment, color: Colors.deepPurple),
-              title: const Text('Marksheet'),
-              onTap: () {
-                Navigator.pop(context); 
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => MarksPage()),
+                  MaterialPageRoute(builder: (context) => TeacherAnnouncementsPage()),
                 );
               },
             ),
@@ -233,10 +215,6 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
               title: const Text('Apply for Leave'),
               onTap: () {
                 Navigator.pop(context); 
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => ApplyForLeavePage()),
-                );
               },
             ),
             ListTile(
@@ -246,14 +224,20 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
                 Navigator.pop(context); 
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => ConcernsPage()),
+                  MaterialPageRoute(builder: (context) => TeacherConcernPage()),
                 );
               },
             ),
             ListTile(
               leading: const Icon(Icons.contact_mail, color: Colors.deepPurple),
-              title: const Text('Contact Us'),
-              onTap: () {},
+              title: const Text('Upload Student Attendance  '),
+              onTap: () {
+                Navigator.pop(context); 
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AttendancePage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.deepPurple),
@@ -262,7 +246,7 @@ class _ApplyForLeavePageState extends State<ApplyForLeavePage> {
                 Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const ParentLoginPage()),
+                  MaterialPageRoute(builder: (context) => const TeacherLoginPage()),
                 );
               },
             ),
