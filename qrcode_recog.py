@@ -63,7 +63,7 @@ def log_student_in(roll_number):
     try:
         # Check if already marked
         cursor.execute(
-            "SELECT * FROM day_attendance WHERE rollno = %s AND date = %s",  # Updated column name
+            "SELECT * FROM day_attendance WHERE roll_number = %s AND date = %s",  # Updated column name
             (roll_number, date_str),
         )
         if cursor.fetchone():
@@ -75,7 +75,7 @@ def log_student_in(roll_number):
 
         # Insert attendance record
         cursor.execute(
-            "INSERT INTO day_attendance (rollno, time, date, status) VALUES (%s, %s, %s, %s)",  # Updated column name
+            "INSERT INTO day_attendance (roll_number, time, date, status) VALUES (%s, %s, %s, %s)",  # Updated column name
             (roll_number, time_str, date_str, status),
         )
         conn.commit()

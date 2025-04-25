@@ -288,7 +288,7 @@ def tlogin():
 @app.route('/get_logged_in_students', methods=['GET'])
 def get_logged_in_students():
     class_section = request.args.get('class')  # Get class/section from query parameter
-    table_name = class_section.lower()  # Convert class to lowercase to match table names (11a, 11b, etc.)
+    table_name = class_section.lower()  # Convert class to lowercase to match table names
 
     # Validate the input class/section
     valid_classes = ['elevena', 'elevenb', 'twelvea', 'twelveb']
@@ -302,10 +302,10 @@ def get_logged_in_students():
 
         # Query to fetch roll numbers of students who are logged in (status = 'logged_in')
         query = f"""
-        SELECT s.rollno 
+        SELECT rollno 
         FROM {table_name} AS s
-        JOIN day_attendance AS da ON s.rollno = da.rollno
-        WHERE da.status IN ('On Time', 'Late Comer')
+        JOIN day_attendance ON s.rollno = roll_number
+        WHERE status IN ('On Time', 'Late Comer');
         """
         cursor.execute(query)
         students = cursor.fetchall()
@@ -352,9 +352,9 @@ def mark_absent():
     try:
         # Mark students who are not logged in as 'A' for all periods
         not_logged_in_query = f"""
-        SELECT s.rollno 
+        SELECT s.rollno
         FROM {class_section} AS s
-        LEFT JOIN day_attendance AS da ON s.rollno = da.rollno
+        LEFT JOIN day_attendance AS da ON s.rollno = da.roll_number
         WHERE da.status NOT IN ('On Time', 'Late Comer') OR da.status IS NULL
         """
         cursor.execute(not_logged_in_query)
