@@ -14,3 +14,8 @@ Development Tools: Flask, Flutter, Android Studio
 
 Other Technologies: MySQL for database management
 
+To run the file, path to flutter_application/lib/ and run the main.dart file. Make sure to load the database csv files into your mySQL database. 
+
+To run the API, path to flutter_application/ and run the app.py. This is the API which contains everything necessary to run the project.
+
+To run the QR code recogniser, path to flutter_application/ and run the qrcode_recog.py file. Click on start, and show the QR code to your camera to mark the attendance for the student.
